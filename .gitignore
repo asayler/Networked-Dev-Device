@@ -1,0 +1,13 @@
+#Temporary Editor Files#
+*~
+
+#Build Files#
+*.o
+
+#Kernel Module Build Files#
+*.ko
+*.mod.c
+*.order
+*.symvers
+*.tmp*
+.*.cmd
