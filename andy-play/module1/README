@@ -1,0 +1,14 @@
+To build:
+make build
+
+To load:
+sudo insmod hellomodule.ko
+
+To check:
+lsmod | grep hellomodule
+
+To unload:
+sudo rmmod hellomodule
+
+Logging:
+/var/log/kern.log
