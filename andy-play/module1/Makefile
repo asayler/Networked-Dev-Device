@@ -1,5 +1,7 @@
 #Simple Kernel Module Makefile
 
+EXTRA_CFLAGS = -Wall
+
 ifeq ($(KERNELRELEASE),)
 
 KERNELDIR ?= /lib/modules/$(shell uname -r)/build
