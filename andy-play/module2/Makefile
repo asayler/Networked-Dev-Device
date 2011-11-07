@@ -1,12 +1,10 @@
-TARGET  := hello-1
-WARN    := -W -Wall -Wstrict-prototypes -Wmissing-prototypes
-INCLUDE := -isystem /lib/modules/`uname -r`/build/include
-CFLAGS  := -O2 -DMODULE -D__KERNEL__ ${WARN} ${INCLUDE}
-CC      := gcc
+# Simple Kernel Moduel Makefule
+# Using kbuild system (2.6+ kernel)
 
-${TARGET}.o: ${TARGET}.c
+obj-m += hello-1.o
 
-.PHONY: clean
+all:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 
 clean:
-	rm -rf {TARGET}.o
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean

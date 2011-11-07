@@ -1,20 +1,25 @@
-/* hello-1.c - The simplest kernel module. */
-
-/* With help and code from:
- * http://www.faqs.org/docs/kernel/x145.html
+/*  
+ *  hello-1.c - The simplest kernel module.
  */
 
-#include <linux/module.h>  /* Needed by all modules */
-#include <linux/kernel.h>  /* Needed for KERN_ALERT */
+/* With help and code from:
+ * http://www.tldp.org/LDP/lkmpg/2.6/html/x121.html
+ */
 
-int init_module(void){
-    printk("<1>Hello world 1.\n");
+#include <linux/module.h>/* Needed by all modules */
+#include <linux/kernel.h>/* Needed for KERN_INFO */
+
+int init_module(void)
+{
+    printk(KERN_INFO "Hello world 1.\n");
     
-    // A non 0 return means init_module failed; module can't be loaded.
+    /* 
+     * A non 0 return means init_module failed; module can't be loaded. 
+     */
     return 0;
 }
 
 void cleanup_module(void)
 {
-    printk(KERN_ALERT "Goodbye world 1.\n");
+    printk(KERN_INFO "Goodbye world 1.\n");
 }

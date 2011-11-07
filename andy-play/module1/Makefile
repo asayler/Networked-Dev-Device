@@ -1,11 +1,11 @@
 #Simple Kernel Module Makefile
+# Using kbuild system (2.6+ kernel)
 
 EXTRA_CFLAGS = -Wall
-
-ifeq ($(KERNELRELEASE),)
-
 KERNELDIR ?= /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)
+
+obj-m := hellomodule.o
 
 .PHONY: build clean
 
@@ -13,10 +13,5 @@ build:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules
 
 clean:
-	rm -rf *.o *~ *.ko *.mod.c .*.cmd *.order *.symvers .tmp*
-else
-
-$(info Building with KERNELRELEASE = ${KERNELRELEASE})
-obj-m := hellomodule.o
-
-endif
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
+#	rm -rf *.o *~ *.ko *.mod.c .*.cmd *.order *.symvers .tmp*
