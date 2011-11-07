@@ -1,6 +1,8 @@
 # Simple Kernel Moduel Makefule
 # Using kbuild system (2.6+ kernel)
 
+EXTRA_CFLAGS = -Wall
+
 obj-m += hello-1.o
 obj-m += hello-2.o
 obj-m += hello-3.o

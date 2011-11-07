@@ -9,7 +9,9 @@
 #include <linux/kernel.h>/* We're doing kernel work */
 #include <linux/module.h>/* Specifically, a module  */
 
-void __exit stop_module()
+void __exit stop_module(void);
+
+void __exit stop_module(void)
 {
     printk(KERN_INFO "Short is the life of a kernel module\n");
 }

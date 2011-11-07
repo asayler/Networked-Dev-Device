@@ -16,6 +16,8 @@ MODULE_AUTHOR("A Sayler <andy.sayler@gmail.com>");     /* Who wrote this module?
 MODULE_DESCRIPTION("A sample kernel module");          /* What does this module do? */
 MODULE_SUPPORTED_DEVICE("testdevice";)                 /* What type of device? */
 
+static int __init start_module(void);
+
 static int __init start_module(void)
 {
     printk(KERN_INFO "Hello, world - this is the kernel speaking\n");
