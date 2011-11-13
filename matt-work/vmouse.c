@@ -16,21 +16,41 @@ static struct device*    vmouse_device;
 
 static const unsigned int MAJOR = 27;
 
-static ssize_t vmouse_write(struct file* fp,
-                            const char* buf,
-                            size_t length,
-                            loff_t* offset)
+static ssize_t vmouse_read(struct file* fp,
+                           char* buf,
+                           size_t length,
+                           loff_t* offset)
 {
-	printk(KERN_INFO "vmouse: 'write'... sending event!\n");
+	static int   state = 0;
+	unsigned int code;
+	int          val;
 
-	input_report_rel(vmouse_dev, REL_X, 10);
+	if (state < 10) {
+		code = REL_X;
+		val  = 5;
+
+	} else if (state < 20) {
+		code = REL_Y;
+		val  = 5;
+	} else if (state < 30) {
+		code = REL_X;
+		val  = -5;
+	} else {
+		code = REL_Y;
+		val  = -5;
+		if (state == 39)
+			state = -1;
+	}
+
+	state++;
+	input_report_rel(vmouse_dev, code, val);
 	input_sync(vmouse_dev);
-	
-	return length;
+
+	return 0;
 }
 
 static struct file_operations fops = {
-	.write = vmouse_write
+	.read = vmouse_read
 };
 
 static int __init vmouse_init(void)
@@ -48,12 +68,19 @@ static int __init vmouse_init(void)
 		return -ENOMEM;
 	}
 
-	vmouse_dev->name = "Matt's vmouse";
+	vmouse_dev->name = "matt's vmouse";
+
+	vmouse_dev->id.vendor  = 0x0001;
+	vmouse_dev->id.product = 0x0003;
+	vmouse_dev->id.version = 0x0100;
 	vmouse_dev->id.bustype = BUS_VIRTUAL;
 
-	vmouse_dev->evbit[0] = BIT_MASK(EV_REL);
-	vmouse_dev->relbit[BIT_WORD(REL_X)] = BIT_MASK(REL_X);
-	vmouse_dev->relbit[BIT_WORD(REL_Y)] = BIT_MASK(REL_Y);
+	set_bit(EV_REL,   vmouse_dev->evbit);
+	set_bit(REL_X,    vmouse_dev->relbit);
+	set_bit(REL_Y,    vmouse_dev->relbit);
+
+	set_bit(EV_KEY,   vmouse_dev->evbit);
+	set_bit(BTN_LEFT, vmouse_dev->keybit);
 
 	ret = input_register_device(vmouse_dev);
 
@@ -74,7 +101,7 @@ static int __init vmouse_init(void)
 	/* create a device node, normally udev would do this! */
 
 	vmouse_class = class_create(THIS_MODULE, "vmouse");
-	
+
 	if (vmouse_class <= 0) {
 		printk(KERN_ERR "vmouse: failed to create class\n");
 		ret = -1;
