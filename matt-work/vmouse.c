@@ -24,6 +24,7 @@ static ssize_t vmouse_write(struct file* fp,
 	printk(KERN_INFO "vmouse: 'write'... sending event!\n");
 
 	input_report_rel(vmouse_dev, REL_X, 10);
+	input_sync(vmouse_dev);
 	
 	return length;
 }
@@ -51,8 +52,8 @@ static int __init vmouse_init(void)
 	vmouse_dev->id.bustype = BUS_VIRTUAL;
 
 	vmouse_dev->evbit[0] = BIT_MASK(EV_REL);
-	vmouse_dev->keybit[BIT_WORD(REL_X)] = BIT_MASK(REL_X);
-	vmouse_dev->keybit[BIT_WORD(REL_Y)] = BIT_MASK(REL_Y);
+	vmouse_dev->relbit[BIT_WORD(REL_X)] = BIT_MASK(REL_X);
+	vmouse_dev->relbit[BIT_WORD(REL_Y)] = BIT_MASK(REL_Y);
 
 	ret = input_register_device(vmouse_dev);
 
