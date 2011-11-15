@@ -18,6 +18,8 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 
+#define MAXCOMMANDSIZE 256
+
 void error(const char *msg)
 {
     perror(msg);
@@ -31,6 +33,10 @@ int main(int argc, char *argv[])
     struct hostent *server;
 
     char buffer[256];
+    char cmdbuffer[MAXCOMMANDSIZE];
+
+    printf("cmdbuffer size:  %lu\n", sizeof(cmdbuffer));
+    printf("*cmdbuffer size: %lu\n", sizeof(*cmdbuffer));
 
     if (argc < 3) {
        fprintf(stderr,"usage %s hostname port\n", argv[0]);
@@ -61,12 +67,10 @@ int main(int argc, char *argv[])
         error("ERROR connecting");
     }
     
-    printf("Please enter the message: ");
+    printf("Command: ");
     
     bzero(buffer, 256);
     fgets(buffer, 255, stdin);
-
-    printf("string length: %d\n", strlen(buffer));
     
     n = write(sockfd,buffer,strlen(buffer));
     if (n < 0) {
