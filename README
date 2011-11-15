@@ -3,7 +3,7 @@ Networked Dev Device
 Contributors:
 Andy Sayler - andrew.sayler@colorado.edu
 Matthew Monaco - matthew.monaco@colorado.edu
-Landon Spear
+Landon Spear - landon.spear@colorado.edu
 
-An effort to transparently network charetcter and block devices
+An effort to transparently network charecter and block devices
 in the /dev Linux filesystem.
