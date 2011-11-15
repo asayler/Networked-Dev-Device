@@ -13,7 +13,7 @@
 MODULE_LICENSE("GPL");                                 /* Module license */
 MODULE_AUTHOR("A Sayler <andy.sayler@gmail.com>");     /* Who wrote this module? */
 MODULE_DESCRIPTION("A sample kernel module");          /* What does this module do? */
-MODULE_SUPPORTED_DEVICE("testdevice";)                 /* What type of device? */
+MODULE_SUPPORTED_DEVICE("testdevice");                 /* What type of device? */
 
 static short int myshort = 3;
 static int myint = 333;

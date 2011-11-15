@@ -3,42 +3,43 @@
  *  you've read from the dev file
  */
 
-
 /* 
  * With help and code from:
  * http://www.tldp.org/LDP/lkmpg/2.6/html/x569.html
  */
 
-
-#include <linux/kernel.h>
-#include <linux/module.h>
+/* System Includes */
+#include <linux/module.h>  /* Needed by all modules */
+#include <linux/kernel.h>  /* Needed for KERN_INFO */
 #include <linux/fs.h>
-#include <asm/uaccess.h>      /* for put_user */
+#include <asm/uaccess.h>   /* for put_user */
 
-/*  
- *  Prototypes - this would normally go in a .h file
- */
-int init_module(void);
-void cleanup_module(void);
+/* Module Info */
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("A Sayler <andy.sayler@gmail.com>");
+MODULE_DESCRIPTION("A sample kernel module");
+MODULE_SUPPORTED_DEVICE("testdevice");
+
+/* Global Defines */
+#define SUCCESS 0
+#define DEVICE_NAME "chardev" /* Dev name as it appears in /proc/devices   */
+#define BUF_LEN 80            /* Max length of the message from the device */
+
+/* Global variables are declared as static, so are global within the file. */
+static int Major;           /* Major number assigned to our device driver */
+static int Device_Open = 0; /* Used to prevent multiple access to device */
+static char msg[BUF_LEN];   /* The msg the device will give when asked */
+static char *msg_Ptr;
+
+/* Prototypes - this would normally go in a .h file */
+static int __init module_start(void);
+static void __exit module_end(void);
 static int device_open(struct inode *, struct file *);
 static int device_release(struct inode *, struct file *);
 static ssize_t device_read(struct file *, char *, size_t, loff_t *);
 static ssize_t device_write(struct file *, const char *, size_t, loff_t *);
 
-#define SUCCESS 0
-#define DEVICE_NAME "chardev" /* Dev name as it appears in /proc/devices   */
-#define BUF_LEN 80            /* Max length of the message from the device */
-
-/* 
- * Global variables are declared as static, so are global within the file. 
- */
-
-static int Major;           /* Major number assigned to our device driver */
-static int Device_Open = 0; /* Is device open?  
-                             * Used to prevent multiple access to device */
-static char msg[BUF_LEN];   /* The msg the device will give when asked */
-static char *msg_Ptr;
-
+/* Assign Function Handlers */
 static struct file_operations fops = {
     .read = device_read,
     .write = device_write,
@@ -46,10 +47,12 @@ static struct file_operations fops = {
     .release = device_release
 };
 
-/*
- * This function is called when the module is loaded
- */
-int init_module(void)
+/* Assign Init and Exit */
+module_init(module_start);
+module_exit(module_end);
+
+/* This function is called when the module is loaded */
+static int __init module_start(void)
 {
     Major = register_chrdev(0, DEVICE_NAME, &fops);
 
@@ -68,19 +71,11 @@ int init_module(void)
     return SUCCESS;
 }
 
-/*
- * This function is called when the module is unloaded
- */
-void cleanup_module(void)
+/* This function is called when the module is unloaded */
+static void __exit module_end(void)
 {
-    /* 
-     * Unregister the device 
-     */
+    /* Unregister the device */
     unregister_chrdev(Major, DEVICE_NAME);
-    /*
-    if (ret < 0)
-        printk(KERN_ALERT "Error in unregister_chrdev: %d\n", ret);
-    */
 }
 
 /*
@@ -95,8 +90,9 @@ static int device_open(struct inode *inode, struct file *file)
 {
     static int counter = 0;
 
-    if (Device_Open)
+    if(Device_Open){
         return -EBUSY;
+    }
 
     Device_Open++;
     sprintf(msg, "I already told you %d times: Hello world!\n", counter++);
@@ -140,8 +136,9 @@ static ssize_t device_read(struct file *filp, /* see include/linux/fs.h   */
      * If we're at the end of the message, 
      * return 0 signifying end of file 
      */
-    if (*msg_Ptr == 0)
+    if (*msg_Ptr == '\n'){
         return 0;
+    }
 
     /* 
      * Actually put the data into the buffer 
