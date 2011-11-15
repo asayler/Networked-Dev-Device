@@ -136,7 +136,7 @@ static ssize_t device_read(struct file *filp, /* see include/linux/fs.h   */
      * If we're at the end of the message, 
      * return 0 signifying end of file 
      */
-    if (*msg_Ptr == '\n'){
+    if (*msg_Ptr == '\0'){
         return 0;
     }
 

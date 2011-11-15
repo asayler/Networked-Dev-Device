@@ -1,15 +1,26 @@
 # Kernel Modules and Drivers:
 ### Web Resources
-    *https://www.linux.com/learn/linux-career-center/23685-the-kernel-newbie-corner-your-first-loadable-kernel-module
-    *http://www.tldp.org/LDP/lkmpg/2.4/html/index.html - Kernel 2.4 Reference (Outdated!)
-    *http://www.tldp.org/LDP/lkmpg/2.6/html/index.html - Kernal 2.6 Reference (Less Outdated)
+    *https://www.linux.com/learn/linux-career-center/
+     23685-the-kernel-newbie-corner-your-first-loadable-kernel-module
+    *http://www.tldp.org/LDP/lkmpg/2.4/html/index.html
+     - Kernel 2.4 Reference (Outdated!)
+    *http://www.tldp.org/LDP/lkmpg/2.6/html/index.html 
+     - Kernal 2.6 Reference (Less Outdated)
     *http://www.freesoftwaremagazine.com/articles/drivers_linux?page=0%2C11
     *http://techblog.aasisvinayak.com/kernel-module-programming-tutorial/
     *http://www.linuxforu.com/teach-me/a-voyage-to-the-kernel-day-11/
-    *http://www.mulix.org/lectures/intro_to_linux_device_drivers/intro_linux_device_drivers.pdf
+    *http://www.mulix.org/lectures/intro_to_linux_device_drivers/
+     intro_linux_device_drivers.pdf
 ### Local Resources:
     */usr/src/linux/Documentation/kbuild/modules.txt.
 
-#Block and Character Devices
+# Block and Character Devices
 ### Local Resources:
     */usr/src/linux/Documentation/devices.txt
+
+# Kernel <-> User Space Interfaces
+### Web Resources
+    *http://www.linuxjournal.com/article/7356 - Netlink Socket
+    *http://people.ee.ethz.ch/~arkeller/linux/kernel_user_space_howto.html
+     - Good Interface Overview
+    *http://www.linuxjournal.com/article/7660 - Kernel Space Networking
