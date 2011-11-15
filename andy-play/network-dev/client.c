@@ -35,9 +35,6 @@ int main(int argc, char *argv[])
     char buffer[256];
     char cmdbuffer[MAXCOMMANDSIZE];
 
-    printf("cmdbuffer size:  %lu\n", sizeof(cmdbuffer));
-    printf("*cmdbuffer size: %lu\n", sizeof(*cmdbuffer));
-
     if (argc < 3) {
        fprintf(stderr,"usage %s hostname port\n", argv[0]);
        exit(0);
@@ -69,9 +66,11 @@ int main(int argc, char *argv[])
     
     printf("Command: ");
     
-    bzero(buffer, 256);
-    fgets(buffer, 255, stdin);
+    bzero(cmdbuffer, sizeof(cmdbuffer));
+    fgets(cmdbuffer, sizeof(cmdbuffer), stdin);
     
+    strncpy(buffer, cmdbuffer, sizeof(buffer));
+
     n = write(sockfd,buffer,strlen(buffer));
     if (n < 0) {
         error("ERROR writing to socket");
