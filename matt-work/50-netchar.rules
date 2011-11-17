@@ -1,0 +1,1 @@
+ACTION=="add", KERNEL=="netchar_control", MODE="0666"
