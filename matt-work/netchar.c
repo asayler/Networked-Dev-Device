@@ -13,9 +13,9 @@
 #define _PKE             KERN_ERR  _MODULE_NAME ": "
 #define _PKI             KERN_INFO _MODULE_NAME ": "
 
-struct device* netchar_device_ctrl;
-struct class*  netchar_class;
-struct cdev*   netchar_cdev;
+static struct device* netchar_device_ctrl;
+static struct class*  netchar_class;
+static struct cdev*   netchar_cdev;
 
 /*
  * CONTROL DEVICE
