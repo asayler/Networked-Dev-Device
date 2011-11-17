@@ -164,7 +164,7 @@ static void netchar_device_destroy(int i)
 
 static int __init netchar_init(void)
 {
-	int error, i;
+	int error, i = 0;
 	
 	printk(_PKI "initializing");
 
