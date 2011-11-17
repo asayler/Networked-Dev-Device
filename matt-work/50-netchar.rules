@@ -1,1 +1,1 @@
-ACTION=="add", KERNEL=="netchar_control", MODE="0666"
+ACTION=="add", SUBSYSTEM=="netchar", MODE="0666"

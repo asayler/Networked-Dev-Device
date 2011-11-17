@@ -4,138 +4,289 @@
 #include <linux/fs.h>
 #include <linux/device.h>
 #include <linux/cdev.h>
+#include <linux/slab.h>
+
+#include "netchar.h"
 
 #define _MODULE_NAME     "netchar"
 #define _MAJOR           27
-#define _DEV_CONTROL     MKDEV(_MAJOR,0)
-#define _MAX_IMPORTS     16 /* very arbitrary */
+#define _DEV_FIRST_CTL   MKDEV(_MAJOR,0)
+#define _DEV_FIRST_IMP   MKDEV(_MAJOR,NETCHAR_NUM_DEVS)
+#define _DEV_FIRST       _DEV_FIRST_CTL
 
 #define _PKE             KERN_ERR  _MODULE_NAME ": "
 #define _PKI             KERN_INFO _MODULE_NAME ": "
 
-static struct device* netchar_device_ctrl;
 static struct class*  netchar_class;
-static struct cdev*   netchar_cdev;
+static struct cdev*   netchar_cdev_ctl;
+static struct cdev*   netchar_cdev_imp;
 
-static int    netchar_num_imports = 0;
+/* the netchar_device ties together the control and import devices
+ * so that we know where to redirect data in their complementary
+ * fs handlers
+ *
+ * we also keep an array of all allocated structs so that they can
+ * be freed on errors and exit
+ *
+ * */
+
+struct netchar_device {
+	int            index;
+	struct device* ctl;
+	struct device* imp;
+};
+
+static struct netchar_device* netchar_devices[NETCHAR_NUM_DEVS];
 
 /*
- * CONTROL DEVICE
+ * CONTROL DEVICES
  */
 
-static int netchar_open(struct inode* in, struct file* f)
-{
-	if (netchar_num_imports < _MAX_IMPORTS)
-		return 0;
-	else
-		return -ENODEV;
-}
 
-static ssize_t netchar_read(struct file* fp, char* buffer,
-                            size_t length, loff_t* offset)
-{
-	printk(_PKI "control read");
-	return 0;
-}
-
-static ssize_t netchar_write(struct file* fp, const char* buffer,
-                             size_t length, loff_t* offset)
-{
-	printk(_PKE "control write");
-	return length;
-}
-
-static struct file_operations fops_control = {
-	.owner  = THIS_MODULE,
-	.read   = netchar_read,
-	.write  = netchar_write
+static struct file_operations netchar_fops_ctl = {
+	.owner  = THIS_MODULE
 };
 
 /*
- * IMPORTED DEVICES
+ * IMPORT DEVICES
  */
 
+static struct file_operations netchar_fops_imp = {
+	.owner = THIS_MODULE
+};
 
 /*
  * BASICS
  */
 
-static int __init netchar_init(void)
+
+static long netchar_device_create(int i)
 {
 	int error;
+	dev_t  cnum, inum;
+	struct device* ctl;
+	struct device* imp;
+	struct netchar_device* nd;
+
+	cnum = MKDEV(_MAJOR, i+NETCHAR_NUM_DEVS);
+	inum = MKDEV(_MAJOR, i);
+
+	/* create "control" device node in userspace */
+
+	ctl = device_create(netchar_class, NULL, cnum, NULL, "netchar/ctl%i", i);
+	error = PTR_ERR(ctl);
+
+	if (IS_ERR_VALUE(error)) {
+		printk(_PKE "error creating control device (%i): %i", i, -error);
+		goto devcr_err_ctl;
+	}
+
+	/* ditto for "import" device */
+	
+	imp = device_create(netchar_class, NULL, inum, NULL, "netchar/imp%i", i);
+	error = PTR_ERR(imp);
+
+	if (IS_ERR_VALUE(error)) {
+		printk(_PKE "error creating import device (%i): %i", i, -error);
+		goto devcr_err_imp;
+	}
+
+	/* tie the two together in a netchar_device struct */
+
+	nd = kmalloc(sizeof(struct netchar_device), GFP_KERNEL);
+	error = PTR_ERR(nd);
+	
+	if (IS_ERR_VALUE(error)) {
+		printk(_PKE "error creating netchar_device (%i): %i", i, -error);
+		goto devcr_err_nd;
+	}
+
+	nd->index = i;
+	nd->ctl   = ctl;
+	nd->imp   = imp;
+
+	netchar_devices[i] = nd;
+
+	return 0;
+	
+	devcr_err_nd:
+
+	device_destroy(netchar_class, inum);
+	devcr_err_imp:
+	
+	device_destroy(netchar_class, cnum);
+	devcr_err_ctl:
+
+	return error;
+}
+
+static void netchar_device_destroy(int i)
+{
+	dev_t  cnum, inum;
+
+	cnum = MKDEV(_MAJOR, i+NETCHAR_NUM_DEVS);
+	inum = MKDEV(_MAJOR, i);
+	
+	device_destroy(netchar_class, cnum);
+	device_destroy(netchar_class, inum);
+	
+	kfree(netchar_devices[i]);
+}
+
+static int __init netchar_init(void)
+{
+	int error, i;
 	
 	printk(_PKI "initializing");
 
-	/* register major,minor of control device*/
+	/* register device major/minors
+	 *
+	 * this just reserves a group of major/minor pairs for this module
+	 *
+	 * */
 
-	error = register_chrdev_region(_DEV_CONTROL, 1,_MODULE_NAME);
+	error = register_chrdev_region(_DEV_FIRST, NETCHAR_NUM_DEVS*2, _MODULE_NAME);
 
 	if (error != 0) {
-		printk(_PKE "error registering control device: %i", -error);
-		goto init_err;
-	}
-	
-	/* setup cdev */
-
-	netchar_cdev = cdev_alloc();
-	error = PTR_ERR(netchar_cdev);
-
-	if (IS_ERR_VALUE(error)) {
-		printk(_PKE "error allocating cdev: %i", -error);
+		printk(_PKE "error registering major/minors: %i", -error);
 		goto init_err_region;
 	}
-
-	netchar_cdev->owner = THIS_MODULE;
-	netchar_cdev->ops   = &fops_control;
-
-	/* add cdev */
-
-	error = cdev_add(netchar_cdev, _DEV_CONTROL, 1);
-
-	if (error != 0) {
-		printk(_PKE "error adding cdev: %i", -error);
-		goto init_err_cdev;
-	}
-
-	/* create device class (subsystem) */
+	
+	/* create device class (subsystem)
+	 *
+	 * this creates a class to which all of our devices will belong (both
+	 * control devices and import devices). besides that it is required for
+	 * a device to have a class, it gives us the SUBSYSTEM tag in udev so
+	 * we can change the permissions on all /dev nones of interest
+	 *
+	 * */
 
 	netchar_class = class_create(THIS_MODULE, "netchar");
 	error = PTR_ERR(netchar_class);
 
 	if (IS_ERR_VALUE(error)) {
 		printk(_PKE "failed to create class: %i", -error);
-		goto init_err_cdev;
-	}
-
-	/* create device node in userspace */
-
-	netchar_device_ctrl = device_create(netchar_class, NULL, _DEV_CONTROL,
-	                                    NULL, "netchar_control");
-	error = PTR_ERR(netchar_device_ctrl);
-
-	if (IS_ERR_VALUE(error)) {
-		printk(_PKI "error creating device: %i", -error);
 		goto init_err_class;
 	}
 
+	/* setup ctl cdev 
+	 *
+	 * the cdev ties a set of file_operations (handlers for fs system calls)
+	 * to a range of major,minor pairs. this cdev is for our "control"
+	 * devices
+	 *
+	 * */
+
+	netchar_cdev_ctl = cdev_alloc();
+	error = PTR_ERR(netchar_cdev_ctl);
+
+	if (IS_ERR_VALUE(error)) {
+		printk(_PKE "error allocating ctl cdev: %i", -error);
+		goto init_err_cdev_ctl;
+	}
+
+	netchar_cdev_ctl->owner = THIS_MODULE;
+	netchar_cdev_ctl->ops   = &netchar_fops_ctl;
+
+	/* add ctl cdev
+	 *
+	 * once the cdev is initailized, we need to tell the kernel gods about
+	 * it. it's important to do this after the bulk of the module is
+	 * initialized because once the add happens, we're expected to be able
+	 * to handle fs calls in full
+	 *
+	 * */
+
+	error = cdev_add(netchar_cdev_ctl, _DEV_FIRST_CTL, NETCHAR_NUM_DEVS);
+
+	if (error != 0) {
+		printk(_PKE "error adding ctl cdev: %i", -error);
+		goto init_err_cdev_ctl;
+	}
+
+	/* setup imp cdev 
+	 *
+	 * similar to the above, but for the "import" devices
+	 *
+	 * */
+
+	netchar_cdev_imp = cdev_alloc();
+	error = PTR_ERR(netchar_cdev_imp);
+
+	if (IS_ERR_VALUE(error)) {
+		printk(_PKE "error allocating imp cdev: %i", -error);
+		goto init_err_cdev_imp;
+	}
+
+	netchar_cdev_imp->owner = THIS_MODULE;
+	netchar_cdev_imp->ops   = &netchar_fops_imp;
+
+	/* add imp cdev
+	 *
+	 * ditto
+	 *
+	 * */
+
+	error = cdev_add(netchar_cdev_imp, _DEV_FIRST_IMP, NETCHAR_NUM_DEVS);
+
+	if (error != 0) {
+		printk(_PKE "error adding ctl cdev: %i", -error);
+		goto init_err_cdev_imp;
+	}
+
+	/* create pairs of device nodes in userspace
+	 *
+	 * we need NETCHAR_NUM_DEVS pairs of devices nodes. in the future we'd
+	 * like to do this dynamically, but in the name of progress we'll do
+	 * some hard-coding
+	 *
+	 * */
+
+	for (i = 0; i < NETCHAR_NUM_DEVS; i++) {
+
+		error = netchar_device_create(i);
+
+		if (error != 0)
+			goto init_err_node;
+	}
+
+	/* proper cleanup
+	 *
+	 * any memory the we've allocated and kobjects that we've created
+	 * need to be cleaned up in more or less the reverse order
+	 *
+	 * */
+
 	return 0;
 
-	init_err_class:
+	init_err_node:
+	for (i = i-1; i >= 0; i--) netchar_device_destroy(i);
+
+	cdev_del(netchar_cdev_imp);
+	init_err_cdev_imp:
+	
+	cdev_del(netchar_cdev_ctl);
+	init_err_cdev_ctl:
+	
 	class_destroy(netchar_class);
-	init_err_cdev:
-	cdev_del(netchar_cdev);
+	init_err_class:
+	
+	unregister_chrdev_region(_DEV_FIRST, NETCHAR_NUM_DEVS*2);
 	init_err_region:
-	unregister_chrdev_region(_DEV_CONTROL, 1);
-	init_err:
+	
 	return error;
 }
 
 static void __exit netchar_exit(void)
 {
-	device_destroy(netchar_class, _DEV_CONTROL);
+	int i;
+	
+	for (i = 0; i < NETCHAR_NUM_DEVS; i++) netchar_device_destroy(i);
+	
+	cdev_del(netchar_cdev_ctl);
+	cdev_del(netchar_cdev_imp);
 	class_destroy(netchar_class);
-	cdev_del(netchar_cdev);
-	unregister_chrdev_region(_DEV_CONTROL, 1);
+	unregister_chrdev_region(_DEV_FIRST, NETCHAR_NUM_DEVS*2);
 	
 	printk(_PKI "exit");
 }
