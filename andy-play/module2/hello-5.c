@@ -6,20 +6,21 @@
  * http://www.tldp.org/LDP/lkmpg/2.6/html/x323.html
  */
 
-#include <linux/module.h>   /* Needed by all modules */
-#include <linux/kernel.h>   /* Needed for KERN_INFO */
-#include <linux/init.h>     /* Needed for the macros */
+#include <linux/module.h>	/* Needed by all modules */
+#include <linux/kernel.h>	/* Needed for KERN_INFO */
+#include <linux/init.h>		/* Needed for the macros */
 
-MODULE_LICENSE("GPL");                                 /* Module license */
-MODULE_AUTHOR("A Sayler <andy.sayler@gmail.com>");     /* Who wrote this module? */
-MODULE_DESCRIPTION("A sample kernel module");          /* What does this module do? */
-MODULE_SUPPORTED_DEVICE("testdevice");                 /* What type of device? */
+MODULE_LICENSE("GPL");		/* Module license */
+MODULE_AUTHOR("A Sayler <andy.sayler@gmail.com>");	/* Who wrote this module? */
+MODULE_DESCRIPTION("A sample kernel module");	/* What does this module do? */
+MODULE_SUPPORTED_DEVICE("testdevice");	/* What type of device? */
 
 static short int myshort = 3;
 static int myint = 333;
 static long int mylong = 999999;
 static char *mystring = "Wheeee!";
 static int myintArray[3] = { -1, 0, 1 };
+
 static int arr_argc = 0;
 
 /* 
@@ -52,25 +53,24 @@ MODULE_PARM_DESC(myintArray, "An array of integers");
 
 static int __init hello_5_init(void)
 {
-    int i;
-    printk(KERN_INFO "Hello, world 5\n=============\n");
-    printk(KERN_INFO "myshort is a short integer: %hd\n", myshort);
-    printk(KERN_INFO "myint is an integer: %d\n", myint);
-    printk(KERN_INFO "mylong is a long integer: %ld\n", mylong);
-    printk(KERN_INFO "mystring is a string: %s\n", mystring);
-    for (i = 0; i < (sizeof myintArray / sizeof (int)); i++)
-        {
-            printk(KERN_INFO "myintArray[%d] = %d\n", i, myintArray[i]);
-        }
-    printk(KERN_INFO "got %d arguments for myintArray.\n", arr_argc);
-    return 0;
+	int i;
+	printk(KERN_INFO "Hello, world 5\n=============\n");
+	printk(KERN_INFO "myshort is a short integer: %hd\n", myshort);
+	printk(KERN_INFO "myint is an integer: %d\n", myint);
+	printk(KERN_INFO "mylong is a long integer: %ld\n", mylong);
+	printk(KERN_INFO "mystring is a string: %s\n", mystring);
+	for (i = 0; i < (sizeof myintArray / sizeof(int)); i++) {
+		printk(KERN_INFO "myintArray[%d] = %d\n", i,
+		       myintArray[i]);
+	}
+	printk(KERN_INFO "got %d arguments for myintArray.\n", arr_argc);
+	return 0;
 }
 
 static void __exit hello_5_exit(void)
 {
-    printk(KERN_INFO "Goodbye, world 5.\n");
+	printk(KERN_INFO "Goodbye, world 5.\n");
 }
 
 module_init(hello_5_init);
 module_exit(hello_5_exit);
-
