@@ -97,8 +97,8 @@ static long netchar_device_create(int i)
 	struct device* imp;
 	struct netchar_device* nd;
 
-	cnum = MKDEV(_MAJOR, i+NETCHAR_NUM_DEVS);
-	inum = MKDEV(_MAJOR, i);
+	cnum = MKDEV(_MAJOR, i);
+	inum = MKDEV(_MAJOR, i+NETCHAR_NUM_DEVS);
 
 	/* create "control" device node in userspace */
 
@@ -153,8 +153,8 @@ static void netchar_device_destroy(int i)
 {
 	dev_t  cnum, inum;
 
-	cnum = MKDEV(_MAJOR, i+NETCHAR_NUM_DEVS);
-	inum = MKDEV(_MAJOR, i);
+	cnum = MKDEV(_MAJOR, i);
+	inum = MKDEV(_MAJOR, i+NETCHAR_NUM_DEVS);
 	
 	device_destroy(netchar_class, cnum);
 	device_destroy(netchar_class, inum);
