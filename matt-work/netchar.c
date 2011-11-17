@@ -17,11 +17,21 @@ static struct device* netchar_device_ctrl;
 static struct class*  netchar_class;
 static struct cdev*   netchar_cdev;
 
+static int    netchar_num_imports = 0;
+
 /*
  * CONTROL DEVICE
  */
 
-static ssize_t netchar_read(struct file* fp, char* bufer,
+static int netchar_open(struct inode* in, struct file* f)
+{
+	if (netchar_num_imports < _MAX_IMPORTS)
+		return 0;
+	else
+		return -ENODEV;
+}
+
+static ssize_t netchar_read(struct file* fp, char* buffer,
                             size_t length, loff_t* offset)
 {
 	printk(_PKI "control read");
