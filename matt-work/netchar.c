@@ -17,6 +17,8 @@
 #define _PKE             KERN_ERR  _MODULE_NAME ": "
 #define _PKI             KERN_INFO _MODULE_NAME ": "
 
+#define index_of_devt(x) (MINOR(x) % NETCHAR_NUM_DEVS)
+
 static struct class*  netchar_class;
 static struct cdev*   netchar_cdev_ctl;
 static struct cdev*   netchar_cdev_imp;
@@ -42,15 +44,26 @@ static struct netchar_device* netchar_devices[NETCHAR_NUM_DEVS];
  * CONTROL DEVICES
  */
 
+static int netchar_ctl_open(struct inode* inodp, struct file* fp)
+{
+	int i;
+	i = iminor(inodp) % NETCHAR_NUM_DEVS;
+	fp->private_data = (void*) netchar_devices[i];
+	return 0;
+}
+
 static ssize_t netchar_ctl_read(struct file* fp, char *buffer,
                                 size_t length, loff_t* offset)
 {
-	printk(_PKI "ctl read");
+	int i;
+	i = ((struct netchar_device*)fp->private_data)->index;
+	printk(_PKI "ctl reading %i", i);
 	return 0;
 }
 
 static struct file_operations netchar_fops_ctl = {
 	.owner  = THIS_MODULE,
+	.open   = netchar_ctl_open,
 	.read   = netchar_ctl_read
 };
 
@@ -60,7 +73,10 @@ static struct file_operations netchar_fops_ctl = {
 
 static int netchar_imp_open(struct inode* inodp, struct file* fp)
 {
-	printk(_PKI "imp open");
+	int i;
+	i = iminor(inodp) % NETCHAR_NUM_DEVS;
+	fp->private_data = (void*) netchar_devices[i];
+	printk(_PKI "imp opening %i", i);
 	return 0;
 }
 
@@ -72,7 +88,6 @@ static struct file_operations netchar_fops_imp = {
 /*
  * BASICS
  */
-
 
 static long netchar_device_create(int i)
 {
