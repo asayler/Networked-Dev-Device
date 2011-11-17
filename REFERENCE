@@ -17,6 +17,10 @@
 # Block and Character Devices
 ### Local Resources:
     */usr/src/linux/Documentation/devices.txt
+    # This is the best single resource, but it is slightly out of date
+    # you really need to suplement anything in here with reading headers
+    # (and some times source)
+    http://lwn.net/Kernel/LDD3/
 
 # Kernel <-> User Space Interfaces
 ### Web Resources
