@@ -42,17 +42,31 @@ static struct netchar_device* netchar_devices[NETCHAR_NUM_DEVS];
  * CONTROL DEVICES
  */
 
+static ssize_t netchar_ctl_read(struct file* fp, char *buffer,
+                                size_t length, loff_t* offset)
+{
+	printk(_PKI "ctl read");
+	return 0;
+}
 
 static struct file_operations netchar_fops_ctl = {
-	.owner  = THIS_MODULE
+	.owner  = THIS_MODULE,
+	.read   = netchar_ctl_read
 };
 
 /*
  * IMPORT DEVICES
  */
 
+static int netchar_imp_open(struct inode* inodp, struct file* fp)
+{
+	printk(_PKI "imp open");
+	return 0;
+}
+
 static struct file_operations netchar_fops_imp = {
-	.owner = THIS_MODULE
+	.owner = THIS_MODULE,
+	.open  = netchar_imp_open
 };
 
 /*
