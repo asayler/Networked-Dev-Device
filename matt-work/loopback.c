@@ -3,10 +3,10 @@
 #include <errno.h>
 #include <string.h>
 
-#include <linux/fanotify.h>
-#include <linux/fcntl.h>
+#include <fcntl.h>
 #include <unistd.h>
-#include <sys/syscall.h>
+
+#include "netchar.h"
 
 /* id just like to note the I really appreciate the simply things in life,
  * like client and server having the same number of characters
@@ -17,41 +17,54 @@ const char* SERVER_DEV = "/dev/random";
 
 int main()
 {
-	int fd, ret;
-	struct fanotify_event_metadata* fem;
+	int cfd, sfd, i;
+	struct netchar_msg msg;
+	struct netchar_ret ret;
 
-	fd = syscall(SYS_fanotify_init, FAN_ACCESS | FAN_MODIFY, 0, 0);
+	cfd = open(CLIENT_DEV, O_RDWR, 0);
 
-	if (fd < 0) {
-		fprintf(stderr, "fanotify_init resulted in an error (%i): %s\n", errno, strerror(errno));
+	if (cfd == -1) {
+
+		printf("Error opening %s (%i): %s\n",
+		       CLIENT_DEV, errno, strerror(errno));
 		return EXIT_FAILURE;
 	}
-
-	
-	ret = syscall(SYS_fanotify_mark, fd, FAN_MARK_ADD, FAN_ACCESS | FAN_MODIFY,
-	              AT_FDCWD, CLIENT_DEV);
-
-	if (ret < 0) {
-		fprintf(stderr, "fanotify_mark resulted in an error (%i): %s\n", errno, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	fem = malloc(sizeof(struct fanotify_event_metadata));
 
 	while (1) {
-		
-		ret = read(fd, fem, sizeof(struct fanotify_event_metadata));
 
-		if (ret < 0) {
-			fprintf(stderr, "read resulted in error (%i): %s\n", errno, strerror(errno));
-		} else {
-		
-			printf("%i read and got: %llu\n", ret, fem->mask);
+		i = read(cfd, &msg, sizeof(msg));
 
-			if (fem->mask != 0) {
-				return EXIT_SUCCESS;
-			}
+		if (i == -1) {
+
+			printf("Error reading %s (%i): %s\n",
+			       CLIENT_DEV, errno, strerror(errno));
+
+			return EXIT_FAILURE;
+		
+		} else if (i != sizeof(struct netchar_msg)) {
+
+			printf("Weirdness reading %s, %i returned\n",
+			       CLIENT_DEV, i);
 		}
+
+		switch(msg.type) {
+
+		case FOP_NONE:
+			break;;
+
+		case FOP_OPEN:
+			puts("FOP_OPEN");
+			sfd = open(SERVER_DEV, O_RDONLY, 0); /* FIXME need to copy mode too */
+			ret.type = msg.type;
+			ret.val  = sfd;
+			write(cfd, &ret, sizeof(ret));
+			break;;
+
+		default:
+			puts("NOIMP");
+		}
+
+		msg.type = FOP_NONE;
 	}
 
 	return EXIT_SUCCESS;

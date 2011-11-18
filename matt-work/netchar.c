@@ -5,6 +5,7 @@
 #include <linux/device.h>
 #include <linux/cdev.h>
 #include <linux/slab.h>
+#include <asm/uaccess.h>
 
 #include "netchar.h"
 
@@ -16,8 +17,6 @@
 
 #define _PKE             KERN_ERR  _MODULE_NAME ": "
 #define _PKI             KERN_INFO _MODULE_NAME ": "
-
-#define index_of_devt(x) (MINOR(x) % NETCHAR_NUM_DEVS)
 
 static struct class*  netchar_class;
 static struct cdev*   netchar_cdev_ctl;
@@ -33,12 +32,21 @@ static struct cdev*   netchar_cdev_imp;
  * */
 
 struct netchar_device {
-	int            index;
-	struct device* ctl;
-	struct device* imp;
+	int                 index;
+	int                 is_in_use;
+	struct device*      ctl;
+	struct device*      imp;
+	struct netchar_msg  msg;
+	struct netchar_ret  ret;
 };
 
 static struct netchar_device* netchar_devices[NETCHAR_NUM_DEVS];
+
+static struct netchar_device* netchar_get_device(struct inode* ind)
+{
+	int i = iminor(ind) % NETCHAR_NUM_DEVS;
+	return netchar_devices[i];
+}
 
 /*
  * CONTROL DEVICES
@@ -46,23 +54,63 @@ static struct netchar_device* netchar_devices[NETCHAR_NUM_DEVS];
 
 static int netchar_ctl_open(struct inode* inodp, struct file* fp)
 {
-	int i = iminor(inodp) % NETCHAR_NUM_DEVS;
-	fp->private_data = (void*) netchar_devices[i];
+	struct netchar_device* dev = netchar_get_device(inodp);
+	
+	if (dev->is_in_use)
+		return -EBUSY;
+
+	fp->private_data = dev;
+	
+	return 0;
+}
+
+static int netchar_ctl_release(struct inode* inodp, struct file* fp)
+{
+	struct netchar_device* dev = fp->private_data;
+	dev->is_in_use = 0;
 	return 0;
 }
 
 static ssize_t netchar_ctl_read(struct file* fp, char *buffer,
                                 size_t length, loff_t* offset)
 {
-	int i = ((struct netchar_device*)fp->private_data)->index;
-	printk(_PKI "ctl reading %i", i);
-	return 0;
+	int ret;
+	struct netchar_device* dev = fp->private_data;
+
+	if (length < sizeof(dev->msg))
+		return -EINVAL;
+
+	ret = copy_to_user(buffer, &dev->msg, sizeof(dev->msg));
+
+	if (ret < 0)
+		return -EFAULT; /* from ldd3 */
+	
+	return sizeof(struct netchar_msg);
+}
+
+static ssize_t netchar_ctl_write(struct file* fp, const char *buffer,
+                                 size_t length, loff_t* offset)
+{
+	int ret;
+	struct netchar_device* dev = fp->private_data;
+
+	if (length < sizeof(dev->ret))
+		return -EINVAL;
+
+	ret = copy_from_user(&dev->ret, buffer, sizeof(dev->ret));
+
+	if (ret < 0)
+		return -EFAULT; /* from ldd3 */
+	
+	return sizeof(struct netchar_msg);
 }
 
 static struct file_operations netchar_fops_ctl = {
-	.owner  = THIS_MODULE,
-	.open   = netchar_ctl_open,
-	.read   = netchar_ctl_read
+	.owner   = THIS_MODULE,
+	.open    = netchar_ctl_open,
+	.release = netchar_ctl_release,
+	.read    = netchar_ctl_read,
+	.write   = netchar_ctl_write
 };
 
 /*
@@ -71,16 +119,32 @@ static struct file_operations netchar_fops_ctl = {
 
 static int netchar_imp_open(struct inode* inodp, struct file* fp)
 {
-	int i = iminor(inodp) % NETCHAR_NUM_DEVS;
-	fp->private_data = (void*) netchar_devices[i];
-	printk(_PKI "imp opening %i", i);
+	struct netchar_device* dev = netchar_get_device(inodp);
+	fp->private_data = dev;
+
+	dev->msg.type = FOP_OPEN;
+	dev->ret.type = FOP_NONE;
+
+	while (dev->ret.type == FOP_NONE) {}
 	
+	dev->msg.type = FOP_NONE;
+
+	return dev->ret.val;
+}
+
+static int netchar_imp_release(struct inode* inodp, struct file* fp)
+{
+	/* just in case */
+	struct netchar_device* dev = fp->private_data;
+	dev->msg.type = FOP_OPEN;
+	dev->ret.type = FOP_NONE;
 	return 0;
 }
 
 static struct file_operations netchar_fops_imp = {
-	.owner = THIS_MODULE,
-	.open  = netchar_imp_open
+	.owner   = THIS_MODULE,
+	.open    = netchar_imp_open,
+	.release = netchar_imp_release
 };
 
 /*
@@ -131,6 +195,11 @@ static long netchar_device_create(int i)
 	nd->index = i;
 	nd->ctl   = ctl;
 	nd->imp   = imp;
+	nd->is_in_use = 0;
+	nd->msg.index = i;
+	nd->msg.type  = FOP_NONE;
+	nd->ret.index = i;
+	nd->ret.type  = FOP_NONE;
 
 	netchar_devices[i] = nd;
 
