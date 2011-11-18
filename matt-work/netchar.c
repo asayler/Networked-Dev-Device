@@ -46,8 +46,7 @@ static struct netchar_device* netchar_devices[NETCHAR_NUM_DEVS];
 
 static int netchar_ctl_open(struct inode* inodp, struct file* fp)
 {
-	int i;
-	i = iminor(inodp) % NETCHAR_NUM_DEVS;
+	int i = iminor(inodp) % NETCHAR_NUM_DEVS;
 	fp->private_data = (void*) netchar_devices[i];
 	return 0;
 }
@@ -55,8 +54,7 @@ static int netchar_ctl_open(struct inode* inodp, struct file* fp)
 static ssize_t netchar_ctl_read(struct file* fp, char *buffer,
                                 size_t length, loff_t* offset)
 {
-	int i;
-	i = ((struct netchar_device*)fp->private_data)->index;
+	int i = ((struct netchar_device*)fp->private_data)->index;
 	printk(_PKI "ctl reading %i", i);
 	return 0;
 }
@@ -73,10 +71,10 @@ static struct file_operations netchar_fops_ctl = {
 
 static int netchar_imp_open(struct inode* inodp, struct file* fp)
 {
-	int i;
-	i = iminor(inodp) % NETCHAR_NUM_DEVS;
+	int i = iminor(inodp) % NETCHAR_NUM_DEVS;
 	fp->private_data = (void*) netchar_devices[i];
 	printk(_PKI "imp opening %i", i);
+	
 	return 0;
 }
 
