@@ -15,6 +15,8 @@
 const char* CLIENT_DEV = "/dev/netchar/ctl0";
 const char* SERVER_DEV = "/dev/random";
 
+const useconds_t POLL_PERIOD = 1000;
+
 int main()
 {
 	int cfd, sfd, i;
@@ -65,6 +67,8 @@ int main()
 		}
 
 		msg.type = FOP_NONE;
+
+		usleep(POLL_PERIOD);
 	}
 
 	return EXIT_SUCCESS;
