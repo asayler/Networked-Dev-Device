@@ -9,7 +9,11 @@ obj-m     += netchar.o
 netchar.ko: netchar.c netchar.h
 	make -C $(KDIR) M=$(PWD) $@
 
+loopback: loopback.c
+	gcc -Wall -g $< -o $@
+
 .PHONY: clean
 
 clean:
 	make -C $(KDIR) M=$(PWD) clean
+	$(RM) loopback
