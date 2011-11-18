@@ -6,7 +6,7 @@ KDIR := /lib/modules/$(shell uname -r)/build
 obj-m     += netchar.o
 #netchar-y := netchar-control.o
 
-netchar.ko: *.c
+netchar.ko: netchar.c netchar.h
 	make -C $(KDIR) M=$(PWD) $@
 
 .PHONY: clean
