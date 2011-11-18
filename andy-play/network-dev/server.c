@@ -12,10 +12,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
 
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
+
+#define FILEPATH "./testfile"
 
 #define RCVBUFFERSIZE 256
 #define SNDBUFFERSIZE 256
@@ -34,6 +40,8 @@ int main(int argc, char *argv[])
 	char sndbuffer[RCVBUFFERSIZE];
 	struct sockaddr_in serv_addr, cli_addr;
 	int n;
+
+	int fd = -1;
 
 	if (argc < 2) {
 		fprintf(stderr, "ERROR, no port provided\n");
@@ -69,74 +77,71 @@ int main(int argc, char *argv[])
 	if (n < 0) {
 		error("ERROR reading from socket");
 	}
-	/*
-	   switch(rcvbuffer[0])
-	   {
-	   case 'o':
-	   {
-	   sprintf(sndbuffer, "%s", "opening...");
-	   printf("%s\n", sndbuffer);
-	   n = write(newsockfd, sndbuffer,
-	   strnlen(sndbuffer, sizeof(sndbuffer)));
-	   if (n < 0){
-	   error("ERROR writing to socket");
-	   }
-	   break;
-	   }
-	   case 'c':
-	   {
-	   sprintf(sndbuffer, "%s", "closing...");
-	   printf("%s\n", sndbuffer);
-	   n = write(newsockfd, sndbuffer,
-	   strnlen(sndbuffer, sizeof(sndbuffer)));
-	   if (n < 0){
-	   error("ERROR writing to socket");
-	   }
-	   break;
-	   }
-	   case 'r':
-	   {
-	   sprintf(sndbuffer, "%s", "reading...");
-	   printf("%s\n", sndbuffer);
-	   n = write(newsockfd, sndbuffer,
-	   strnlen(sndbuffer, sizeof(sndbuffer)));
-	   if (n < 0){
-	   error("ERROR writing to socket");
-	   }
-	   break;
-	   }
-	   case 'w':
-	   {
-	   sprintf(sndbuffer, "%s", "writing...");
-	   printf("%s\n", sndbuffer);
-	   n = write(newsockfd, sndbuffer,
-	   strnlen(sndbuffer, sizeof(sndbuffer)));
-	   if (n < 0){
-	   error("ERROR writing to socket");
-	   }
-	   break;
-	   }
-	   case '\0':
-	   default:
-	   {
-	   sprintf(sndbuffer, "%s", "Error: Unknown Operation");
-	   fprintf(stderr, "%s\n", sndbuffer);
-	   n = write(newsockfd, sndbuffer,
-	   strnlen(sndbuffer, sizeof(sndbuffer)));
-	   if (n < 0){
-	   error("ERROR writing to socket");
-	   }
-	   break;
-	   }
-	   }
-	 */
+ 	
+	switch(rcvbuffer[0]) {
+	case 'o':
+	{
+		sprintf(sndbuffer, "%s", "opening...");
+		printf("%s\n", sndbuffer);
+		fd = open(FILEPATH, O_RDWR|O_CLOEXEC|O_SYNC);
+		if(fd < 0){
+			error("ERROR opening file");
+		}
+		break;
+	}
+	case 'c':
+	{
+		sprintf(sndbuffer, "%s", "closing...");
+		printf("%s\n", sndbuffer);
+		break;
+	}
+	case 'r':
+	{
+		sprintf(sndbuffer, "%s", "reading...");
+		printf("%s\n", sndbuffer);
+		break;
+	}
+	case 'w':
+	{
+		sprintf(sndbuffer, "%s", "writing...");
+		printf("%s\n", sndbuffer);
+		break;
+	}
+	case '\0':
+	default:
+	{
+		sprintf(sndbuffer, "%s", "Error: Unknown Operation");
+		fprintf(stderr, "%s\n", sndbuffer);
+		break;
+	}
+	}
+	
+	
+	n = write(newsockfd, sndbuffer,
+		strnlen(sndbuffer, sizeof(sndbuffer)));
+	if (n < 0){
+		error("ERROR writing to socket");
+	}
+	
 
-	n = write(newsockfd, rcvbuffer,
-		  strnlen(rcvbuffer, sizeof(rcvbuffer)));
+	if(fd > 0){
+		printf("fd still open. Closing fd...\n");
+		if(close(fd) < 0){
+			error("ERROR closing file");
+		}
+		else{
+			fd = -1;
+		}
+	}
 
+	sleep(3); /* Wait a bit for client to close first*/
 	printf("Closing Sockets...\n");
-	close(newsockfd);
-	close(sockfd);
-
+	if(close(newsockfd) < 0){
+		error("ERROR closing new socket");
+	}
+	if(close(sockfd) < 0){
+		error("ERROR closing socket");
+	}
+	
 	return 0;
 }

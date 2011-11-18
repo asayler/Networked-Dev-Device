@@ -63,19 +63,17 @@ int main(int argc, char *argv[])
 		error("ERROR connecting");
 	}
 
-	printf("Command: ");
+	printf("Command:");
 
 	bzero(cmdbuffer, sizeof(cmdbuffer));
 	fgets(cmdbuffer, sizeof(cmdbuffer), stdin);
 
 	strncpy(buffer, cmdbuffer, sizeof(buffer));
 
-	n = write(sockfd, buffer, strlen(buffer));
+	n = write(sockfd, buffer, strnlen(buffer, sizeof(buffer)));
 	if (n < 0) {
 		error("ERROR writing to socket");
 	}
-
-	printf("message length: %d\n", n);
 
 	bzero(buffer, 256);
 	n = read(sockfd, buffer, 255);
