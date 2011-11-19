@@ -35,6 +35,8 @@ int main(int argc, char *argv[])
 	char buffer[256];
 	char cmdbuffer[MAXCOMMANDSIZE];
 
+	int run = 1;
+
 	if (argc < 3) {
 		fprintf(stderr, "usage %s hostname port\n", argv[0]);
 		exit(0);
@@ -63,25 +65,41 @@ int main(int argc, char *argv[])
 		error("ERROR connecting");
 	}
 
-	printf("Command:");
+	while(run){
 
-	bzero(cmdbuffer, sizeof(cmdbuffer));
-	fgets(cmdbuffer, sizeof(cmdbuffer), stdin);
+		/* Zero Buffers */
+		bzero(cmdbuffer, sizeof(cmdbuffer));
+		bzero(buffer, sizeof(buffer));
 
-	strncpy(buffer, cmdbuffer, sizeof(buffer));
+		/* Get Input */
+		printf("Command:");
+		fgets(cmdbuffer, sizeof(cmdbuffer), stdin);
 
-	n = write(sockfd, buffer, strnlen(buffer, sizeof(buffer)));
-	if (n < 0) {
-		error("ERROR writing to socket");
+		n = write(sockfd, cmdbuffer, strnlen(cmdbuffer,
+							sizeof(cmdbuffer)));
+		if (n < 0) {
+			error("ERROR writing to socket");
+		}
+		
+		n = read(sockfd, buffer, sizeof(buffer));
+		if (n < 0) {
+			error("ERROR reading from socket");
+		}
+
+		switch(buffer[0]){
+		case 'q':
+		{
+			run = 0;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
+
+		printf("%s\n", buffer);
 	}
-
-	bzero(buffer, 256);
-	n = read(sockfd, buffer, 255);
-	if (n < 0) {
-		error("ERROR reading from socket");
-	}
-
-	printf("%s\n", buffer);
 
 	close(sockfd);
 	return 0;

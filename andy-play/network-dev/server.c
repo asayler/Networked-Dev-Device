@@ -21,15 +21,12 @@
 
 #include <netinet/in.h>
 
-#define FILEPATH "./testfile"
-
 #define RCVBUFFERSIZE 256
 #define SNDBUFFERSIZE 256
 
 void error(const char *msg)
 {
 	perror(msg);
-	exit(1);
 }
 
 int main(int argc, char *argv[])
@@ -39,14 +36,23 @@ int main(int argc, char *argv[])
 	char rcvbuffer[RCVBUFFERSIZE];
 	char sndbuffer[RCVBUFFERSIZE];
 	struct sockaddr_in serv_addr, cli_addr;
-	int n;
+	ssize_t n;
+	int run = 1;
 
+	char* port;
+	char* filepath;
+	
 	int fd = -1;
+	ssize_t sndsize = -1;
 
-	if (argc < 2) {
-		fprintf(stderr, "ERROR, no port provided\n");
+	if (argc < 3) {
+		fprintf(stderr, "usage: %s port filepath\n",
+			argv[0]);
 		exit(1);
 	}
+
+	port = argv[1];
+	filepath = argv[2];
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0) {
@@ -54,7 +60,7 @@ int main(int argc, char *argv[])
 	}
 
 	bzero((char *) &serv_addr, sizeof(serv_addr));
-	portno = atoi(argv[1]);
+	portno = atoi(port);
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(portno);
@@ -72,60 +78,154 @@ int main(int argc, char *argv[])
 		error("ERROR on accept");
 	}
 
-	bzero(rcvbuffer, sizeof(rcvbuffer));
-	n = read(newsockfd, rcvbuffer, sizeof(rcvbuffer));
-	if (n < 0) {
-		error("ERROR reading from socket");
-	}
- 	
-	switch(rcvbuffer[0]) {
-	case 'o':
-	{
-		sprintf(sndbuffer, "%s", "opening...");
-		printf("%s\n", sndbuffer);
-		fd = open(FILEPATH, O_RDWR|O_CLOEXEC|O_SYNC);
-		if(fd < 0){
-			error("ERROR opening file");
+	while(run){
+
+		/* Zero Buffers */
+		bzero(rcvbuffer, sizeof(rcvbuffer));
+		bzero(sndbuffer, sizeof(sndbuffer));
+
+		/* Receive Messege */
+		n = read(newsockfd, rcvbuffer, sizeof(rcvbuffer));
+		if (n < 0) {
+			error("ERROR reading from socket");
 		}
-		break;
-	}
-	case 'c':
-	{
-		sprintf(sndbuffer, "%s", "closing...");
-		printf("%s\n", sndbuffer);
-		break;
-	}
-	case 'r':
-	{
-		sprintf(sndbuffer, "%s", "reading...");
-		printf("%s\n", sndbuffer);
-		break;
-	}
-	case 'w':
-	{
-		sprintf(sndbuffer, "%s", "writing...");
-		printf("%s\n", sndbuffer);
-		break;
-	}
-	case '\0':
-	default:
-	{
-		sprintf(sndbuffer, "%s", "Error: Unknown Operation");
+ 	
+		/* Handle Action */
+		switch(rcvbuffer[0]) {
+		case 'o':
+		{
+			if(fd < 0){
+				fd = open(filepath, O_RDWR|O_CLOEXEC|O_SYNC);
+				if(fd < 0){
+					error("ERROR opening file");
+					sprintf(sndbuffer, "%s",
+						"ERROR opening fd");
+					sndsize = strnlen(sndbuffer,
+							sizeof(sndbuffer));
+				}
+				else{
+					sprintf(sndbuffer, "%s: %d",
+						"fd opened", fd);
+					sndsize = strnlen(sndbuffer,
+							sizeof(sndbuffer));
+				}
+			}
+			else{
+				sprintf(sndbuffer, "%s",
+					"WARNING fd already open");
+				sndsize = strnlen(sndbuffer,
+						sizeof(sndbuffer));
+			}
+			break;
+		}
+		case 'c':
+		{
+			if(fd > 0){
+				if(close(fd) < 0){
+					error("ERROR closing fd");
+					sprintf(sndbuffer, "%s",
+						"ERROR closing fd");
+					sndsize = strnlen(sndbuffer,
+							sizeof(sndbuffer));
+				}
+				else{
+					fd = -1;
+					sprintf(sndbuffer, "%s", "fd closed");
+					sndsize = strnlen(sndbuffer,
+							sizeof(sndbuffer));
+				}
+			}
+			else{
+				sprintf(sndbuffer, "%s",
+					"WARNING no fd open");
+				sndsize = strnlen(sndbuffer,
+						sizeof(sndbuffer));
+			}
+			break;
+		}
+		case 'r':
+		{
+			if(fd > 0){
+				sndsize = read(fd, sndbuffer,
+					sizeof(sndbuffer));
+				fprintf(stderr, "read %zd bytes\n", sndsize);
+				if(sndsize == 0){
+					sprintf(sndbuffer, "%s",
+						"WARNING EOF reached");
+					sndsize = strnlen(sndbuffer,
+							sizeof(sndbuffer));
+				}
+				else if(sndsize < 0){
+					error("ERROR reading");
+					sprintf(sndbuffer, "%s",
+						"ERROR reading");
+					sndsize = strnlen(sndbuffer,
+							sizeof(sndbuffer));
+				}
+			}
+			else{
+				sprintf(sndbuffer, "%s",
+					"WARNING no fd open");
+				sndsize = strnlen(sndbuffer,
+						sizeof(sndbuffer));
+			}
+			break;
+		}
+		case 'w':
+		{
+			if(fd > 0){
+				fprintf(stderr, "writing %zd bytes\n", n-2);
+				sndsize = write(fd, &(rcvbuffer[2]), n-2);
+				sprintf(sndbuffer, "%zd bytes written",
+					sndsize);
+				sndsize = strnlen(sndbuffer,
+						sizeof(sndbuffer));
+				if(sndsize < 0){
+					error("ERROR reading");
+					sprintf(sndbuffer, "%s",
+						"ERROR reading");
+					sndsize = strnlen(sndbuffer,
+							sizeof(sndbuffer));
+				}
+			}
+			else{
+				sprintf(sndbuffer, "%s",
+					"WARNING no fd open");
+				sndsize = strnlen(sndbuffer,
+						sizeof(sndbuffer));
+			}
+			break;
+		}
+		case 'q':
+		{
+			sprintf(sndbuffer, "%s", "quiting...");
+			sndsize = strnlen(sndbuffer,
+					sizeof(sndbuffer));
+			run = 0;
+			break;
+		}
+		case '\0':
+		default:
+		{
+			sprintf(sndbuffer, "%s", "Error: Unknown Operation");
+			sndsize = strnlen(sndbuffer,
+					sizeof(sndbuffer));
+			break;
+		}
+		}
+	
+		/* Send response */
 		fprintf(stderr, "%s\n", sndbuffer);
-		break;
-	}
-	}
-	
-	
-	n = write(newsockfd, sndbuffer,
-		strnlen(sndbuffer, sizeof(sndbuffer)));
-	if (n < 0){
-		error("ERROR writing to socket");
-	}
-	
+		n = write(newsockfd, sndbuffer, sndsize);
+		if (n < 0){
+			error("ERROR writing to socket");
+		}
+	}	
+
 
 	if(fd > 0){
-		printf("fd still open. Closing fd...\n");
+		printf("WARNING fd still open.\n");
+		printf("Closing fd...\n");
 		if(close(fd) < 0){
 			error("ERROR closing file");
 		}
@@ -134,7 +234,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	sleep(3); /* Wait a bit for client to close first*/
+	sleep(1); /* Wait a bit for client to close first*/
 	printf("Closing Sockets...\n");
 	if(close(newsockfd) < 0){
 		error("ERROR closing new socket");
