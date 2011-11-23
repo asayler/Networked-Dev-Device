@@ -1,6 +1,7 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
+
 #include <linux/fs.h>
 #include <linux/device.h>
 #include <linux/cdev.h>
@@ -8,6 +9,8 @@
 #include <asm/uaccess.h>
 
 #include "netchar.h"
+
+#include <linux/delay.h>
 
 #define _MODULE_NAME     "netchar"
 #define _MAJOR           27
@@ -37,7 +40,6 @@ struct netchar_device {
 	struct device*      ctl;
 	struct device*      imp;
 	struct netchar_msg  msg;
-	struct netchar_ret  ret;
 };
 
 static struct netchar_device* netchar_devices[NETCHAR_NUM_DEVS];
@@ -55,7 +57,7 @@ static struct netchar_device* netchar_get_device(struct inode* ind)
 static int netchar_ctl_open(struct inode* inodp, struct file* fp)
 {
 	struct netchar_device* dev = netchar_get_device(inodp);
-	
+
 	if (dev->is_in_use)
 		return -EBUSY;
 
@@ -67,6 +69,12 @@ static int netchar_ctl_open(struct inode* inodp, struct file* fp)
 static int netchar_ctl_release(struct inode* inodp, struct file* fp)
 {
 	struct netchar_device* dev = fp->private_data;
+	
+	if (dev == NULL) {
+		printk(_PKE "ctl_release dev == NULL");
+		return 0;
+	}
+
 	dev->is_in_use = 0;
 	return 0;
 }
@@ -76,7 +84,7 @@ static ssize_t netchar_ctl_read(struct file* fp, char *buffer,
 {
 	int ret;
 	struct netchar_device* dev = fp->private_data;
-
+	
 	if (length < sizeof(dev->msg))
 		return -EINVAL;
 
@@ -84,8 +92,8 @@ static ssize_t netchar_ctl_read(struct file* fp, char *buffer,
 
 	if (ret < 0)
 		return -EFAULT; /* from ldd3 */
-	
-	return sizeof(struct netchar_msg);
+
+	return sizeof(dev->msg);
 }
 
 static ssize_t netchar_ctl_write(struct file* fp, const char *buffer,
@@ -94,15 +102,22 @@ static ssize_t netchar_ctl_write(struct file* fp, const char *buffer,
 	int ret;
 	struct netchar_device* dev = fp->private_data;
 
-	if (length < sizeof(dev->ret))
+	if (dev->msg.status == FOP_STAT_RET_DATA) {
+
+		ret = copy_from_user(dev->msg.buffer, buffer, length);
+		dev->msg.status = FOP_STAT_RET;
+		return length;
+	}
+	
+	if (length < sizeof(dev->msg))
 		return -EINVAL;
 
-	ret = copy_from_user(&dev->ret, buffer, sizeof(dev->ret));
+	ret = copy_from_user(&dev->msg, buffer, sizeof(dev->msg));
 
 	if (ret < 0)
 		return -EFAULT; /* from ldd3 */
 	
-	return sizeof(struct netchar_msg);
+	return sizeof(dev->msg);
 }
 
 static struct file_operations netchar_fops_ctl = {
@@ -110,7 +125,7 @@ static struct file_operations netchar_fops_ctl = {
 	.open    = netchar_ctl_open,
 	.release = netchar_ctl_release,
 	.read    = netchar_ctl_read,
-	.write   = netchar_ctl_write
+	.write   = netchar_ctl_write,
 };
 
 /*
@@ -121,30 +136,68 @@ static int netchar_imp_open(struct inode* inodp, struct file* fp)
 {
 	struct netchar_device* dev = netchar_get_device(inodp);
 	fp->private_data = dev;
-
-	dev->msg.type = FOP_OPEN;
-	dev->ret.type = FOP_NONE;
-
-	while (dev->ret.type == FOP_NONE) {}
 	
-	dev->msg.type = FOP_NONE;
+	dev->msg.type   = FOP_OPEN;
+	dev->msg.status = FOP_STAT_WAIT;
 
-	return dev->ret.val;
+	while (dev->msg.status != FOP_STAT_RET) { mdelay(10); }
+	
+	dev->msg.type   = FOP_NONE;
+	dev->msg.status = FOP_STAT_NONE;
+
+	if (dev->msg.ret.open > 0)
+		return 0;
+	else
+		return dev->msg.ret.open;
 }
 
 static int netchar_imp_release(struct inode* inodp, struct file* fp)
 {
-	/* just in case */
 	struct netchar_device* dev = fp->private_data;
-	dev->msg.type = FOP_OPEN;
-	dev->ret.type = FOP_NONE;
-	return 0;
+
+	dev->msg.type   = FOP_RELEASE;
+	dev->msg.status = FOP_STAT_WAIT;
+
+	while (dev->msg.status != FOP_STAT_RET) { mdelay(10); }
+	
+	dev->msg.type = FOP_NONE;
+	dev->msg.type = FOP_STAT_NONE;
+
+	return dev->msg.ret.release;
+}
+
+static ssize_t netchar_imp_read(struct file* fp, char *buffer,
+                                size_t length, loff_t* offset)
+{
+	struct netchar_device* dev = fp->private_data;
+
+	dev->msg.type   = FOP_READ;
+	dev->msg.status = FOP_STAT_WAIT;
+
+	dev->msg.buffer = buffer;
+	dev->msg.bufsiz = length;
+
+	while (dev->msg.status != FOP_STAT_RET) { mdelay(10); }
+
+	dev->msg.type = FOP_NONE;
+	dev->msg.type = FOP_STAT_NONE;
+
+	return dev->msg.ret.read;
+	
+}
+
+static ssize_t netchar_imp_write(struct file* fp, const char *buffer,
+                                 size_t length, loff_t* offset)
+{
+	return length;
 }
 
 static struct file_operations netchar_fops_imp = {
 	.owner   = THIS_MODULE,
 	.open    = netchar_imp_open,
-	.release = netchar_imp_release
+	.release = netchar_imp_release,
+	.read    = netchar_imp_read,
+	.write   = netchar_imp_write,
 };
 
 /*
@@ -196,10 +249,9 @@ static long netchar_device_create(int i)
 	nd->ctl   = ctl;
 	nd->imp   = imp;
 	nd->is_in_use = 0;
-	nd->msg.index = i;
-	nd->msg.type  = FOP_NONE;
-	nd->ret.index = i;
-	nd->ret.type  = FOP_NONE;
+	
+	nd->msg.type   = FOP_NONE;
+	nd->msg.status = FOP_STAT_NONE;
 
 	netchar_devices[i] = nd;
 

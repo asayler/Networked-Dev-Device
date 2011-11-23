@@ -3,31 +3,34 @@
 
 #define NETCHAR_NUM_DEVS    10
 
-enum { FOP_NONE, FOP_OPEN, FOP_READ, FOP_WRITE, FOP_RELEASE };
-
-struct netchar_read {
-	size_t size;
-	loff_t* offset;
+enum {
+	FOP_NONE,
+	FOP_OPEN, FOP_RELEASE,
+	FOP_READ, FOP_WRITE
 };
 
-struct netchar_write {
-	/* nothing */
+enum {
+	FOP_STAT_NONE,
+	FOP_STAT_WAIT,
+	FOP_STAT_RET_DATA,
+	FOP_STAT_RET,
 };
+
 
 struct netchar_msg {
-	int index;
-	int type;
-	
-	union {
-		struct netchar_read      read;
-		struct netchar_write     write;
-	} fop;
-};
 
-struct netchar_ret {
-	int index;
 	int type;
-	int val;
+	int status;
+
+	char*   buffer;
+	size_t  bufsiz;
+
+	union {
+		int     open;
+		int     release;
+		ssize_t read;
+		ssize_t write;
+	} ret;
 };
 
 #endif /* _NETCHAR_H_ */
