@@ -9,6 +9,7 @@
  */
 
 /* System Includes */
+#include <linux/init.h>
 #include <linux/module.h>	/* Needed by all modules */
 #include <linux/moduleparam.h>
 
@@ -18,8 +19,16 @@
 #include <linux/errno.h>	/* error codes */
 #include <linux/types.h>	/* size_t */
 #include <linux/cdev.h>
+#include <linux/file.h>
 
 #include <asm/uaccess.h>	/* for copy/put_user */
+
+#include <linux/net.h>
+#include <linux/tcp.h>
+#include <linux/in.h>
+#include <linux/socket.h>
+#include <net/sock.h>
+
 
 /* Module Info */
 MODULE_LICENSE("GPL");
@@ -27,14 +36,20 @@ MODULE_AUTHOR("A Sayler <andy.sayler@gmail.com>");
 MODULE_DESCRIPTION("A sample kernel module");
 MODULE_SUPPORTED_DEVICE("testdevice");
 
+/* TODO: Move a lot of this to a proper header file */
+
 /* Global Defines */
 #define SUCCESS 0
 #define DEV_NAME "ncddev" /* Dev name as it appears in /proc/devices   */
-#define BUF_LEN 80	     /* Max length of the message from the device */
+#define BUF_LEN 80	  /* Max length of the message from the device */
 #define NUM_DEVS 1
 
 #ifndef NCD_MAJOR
 #define NCD_MAJOR 0   /* dynamic major by default */
+#endif
+
+#ifndef NCD_MINOR
+#define NCD_MINOR 0   /* first minor by default */
 #endif
 
 /* Structures */
@@ -44,7 +59,7 @@ struct ncd_dev {
 
 /* Local Global Variables */
 static int ncd_major = NCD_MAJOR;
-static int ncd_minor =   0;
+static int ncd_minor = NCD_MINOR;
 static int Device_Open = 0;   /* Used to prevent multiple access to device */
 static char msg[BUF_LEN];     /* The msg the device will give when asked */
 static char* msg_Ptr;
@@ -137,13 +152,14 @@ static int __init ncd_start(void)
 		ncd_setup_cdev(&(ncd_devices[i]), i);
 	}
 
-	printk(KERN_INFO "I was assigned major number %d. To talk to\n",
-	       ncd_major);
-	printk(KERN_INFO "the driver, create a dev file with\n");
-	printk(KERN_INFO "'mknod /dev/%s c %d 0'.\n", DEV_NAME, ncd_major);
-	printk(KERN_INFO
-	       "Try various minor numbers. Try to cat and echo to\n");
-	printk(KERN_INFO "the device file.\n");
+	printk(KERN_INFO "I was assigned major number %d.\n",
+		ncd_major);
+	printk(KERN_INFO "To talk to the driver, create a dev file\n");
+	printk(KERN_INFO "with 'mknod /dev/%s c %d %d'.\n",
+		DEV_NAME, ncd_major, ncd_minor);
+	printk(KERN_INFO "Try various minor numbers from %d to %d.\n",
+		ncd_minor, (ncd_minor + NUM_DEVS - 1));
+	printk(KERN_INFO "Try to cat and echo to the device file.\n");
 	printk(KERN_INFO "Remove the device file and module when done.\n");
 
 	return SUCCESS;
@@ -165,7 +181,7 @@ static void ncd_cleanup(void)
 
 	/* cleanup_module is never called if registering failed */
 	unregister_chrdev_region(devno, NUM_DEVS);
-
+	printk(KERN_INFO "Removed %s module.\n", DEV_NAME);
 }
 
 /*
@@ -178,6 +194,10 @@ static void ncd_cleanup(void)
  */
 static int device_open(struct inode *inode, struct file *file)
 {
+
+	//struct sockaddr_in srcaddr, destaddr;
+	//struct socket* sock = NULL;
+
 	static int counter = 0;
 
 	if (Device_Open) {
@@ -198,7 +218,7 @@ static int device_open(struct inode *inode, struct file *file)
  */
 static int device_release(struct inode *inode, struct file *file)
 {
-	Device_Open--;		/* We're now ready for our next caller */
+	Device_Open--;	/* We're now ready for our next caller */
 
 	/* 
 	 * Decrement the usage count, or else once you opened the file, you'll
