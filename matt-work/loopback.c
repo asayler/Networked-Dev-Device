@@ -25,7 +25,7 @@ void printe(char* s)
 
 int main(void)
 {
-	int cfd, sfd, i;
+	int cfd, sfd, i, j;
 	char* buffer;
 	struct netchar_msg msg;
 
@@ -88,23 +88,23 @@ int main(void)
 			printf("asked to read %zi bytes\n", msg.bufsiz);
 
 			buffer = malloc(sizeof(msg.bufsiz));
-			i = read(sfd, buffer, msg.bufsiz);
+			j = read(sfd, buffer, msg.bufsiz);
 
-			printf("read() returned: %i\n", i);
+			printf("read() returned: %i\n", j);
 
-			printf("<");
-			write(0, buffer, i);
-			puts(">");
+			printf("<"); fflush(stdout);
+			write(0, buffer, j); fflush(stdout);
+			puts(">"); 
 
 			msg.status   = FOP_STAT_RET_DATA;
-			msg.ret.read = i;
+			msg.ret.read = j;
 
 			i = write(cfd, &msg, sizeof(msg));
 			printf("write() returned: %i\n", i);
 
 			msg.status = FOP_STAT_RET;
 
-			i = write(cfd, buffer, i);
+			i = write(cfd, buffer, j);
 			printf("write()2 returned: %i\n", i);
 
 			break;

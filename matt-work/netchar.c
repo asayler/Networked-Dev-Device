@@ -99,16 +99,21 @@ static ssize_t netchar_ctl_read(struct file* fp, char *buffer,
 static ssize_t netchar_ctl_write(struct file* fp, const char *buffer,
                                  size_t length, loff_t* offset)
 {
-	int ret;
+	int ret, i;
 	struct netchar_device* dev = fp->private_data;
 
 	if (dev->msg.status == FOP_STAT_RET_DATA) {
 
+		_PKI("ctlwrtd: length %zi bufsiz %zi", length, dev->msg.bufsiz);
+
 		ret = copy_from_user(dev->msg.buffer, buffer, length);
+		
 		dev->msg.status = FOP_STAT_RET;
+
+		_PKI("data: ret %i, length %zin", ret, length);
 		return length;
 	}
-	
+
 	if (length < sizeof(dev->msg))
 		return -EINVAL;
 
@@ -174,13 +179,22 @@ static ssize_t netchar_imp_read(struct file* fp, char *buffer,
 	dev->msg.type   = FOP_READ;
 	dev->msg.status = FOP_STAT_WAIT;
 
-	dev->msg.buffer = buffer;
+	dev->msg.buffer = kmalloc(length, GFP_KERNEL);
 	dev->msg.bufsiz = length;
+
+	_PKI("impread: length %zi, bufsiz %zi\n", length, dev->msg.bufsiz);
 
 	while (dev->msg.status != FOP_STAT_RET) { mdelay(10); }
 
 	dev->msg.type = FOP_NONE;
 	dev->msg.type = FOP_STAT_NONE;
+
+	copy_to_user(buffer, dev->msg.buffer, dev->msg.ret.read);
+
+	_PKI("read: returning %zi\n", dev->msg.ret.read);
+	_PKI("\t %c%c%c%c\n", buffer[0], buffer[1], buffer[2], buffer[3]);
+
+	kfree(dev->msg.buffer);
 
 	return dev->msg.ret.read;
 	
