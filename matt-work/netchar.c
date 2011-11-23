@@ -12,14 +12,14 @@
 
 #include <linux/delay.h>
 
-#define _MODULE_NAME     "netchar"
-#define _MAJOR           27
-#define _DEV_FIRST_CTL   MKDEV(_MAJOR,0)
-#define _DEV_FIRST_IMP   MKDEV(_MAJOR,NETCHAR_NUM_DEVS)
-#define _DEV_FIRST       _DEV_FIRST_CTL
+#define _MODULE_NAME       "netchar"
+#define _MAJOR             27
+#define _DEV_FIRST_CTL     MKDEV(_MAJOR,0)
+#define _DEV_FIRST_IMP     MKDEV(_MAJOR,NETCHAR_NUM_DEVS)
+#define _DEV_FIRST         _DEV_FIRST_CTL
 
-#define _PKE             KERN_ERR  _MODULE_NAME ": "
-#define _PKI             KERN_INFO _MODULE_NAME ": "
+#define _PKE(fmt,args...)  printk(KERN_ERR  _MODULE_NAME ": " fmt , ## args)
+#define _PKI(fmt,args...)  printk(KERN_INFO _MODULE_NAME ": " fmt , ## args)
 
 static struct class*  netchar_class;
 static struct cdev*   netchar_cdev_ctl;
@@ -71,7 +71,7 @@ static int netchar_ctl_release(struct inode* inodp, struct file* fp)
 	struct netchar_device* dev = fp->private_data;
 	
 	if (dev == NULL) {
-		printk(_PKE "ctl_release dev == NULL");
+		_PKE("ctl_release dev == NULL");
 		return 0;
 	}
 
@@ -221,7 +221,7 @@ static long netchar_device_create(int i)
 	error = PTR_ERR(ctl);
 
 	if (IS_ERR_VALUE(error)) {
-		printk(_PKE "error creating control device (%i): %i", i, -error);
+		_PKE("error creating control device (%i): %i", i, -error);
 		goto devcr_err_ctl;
 	}
 
@@ -231,7 +231,7 @@ static long netchar_device_create(int i)
 	error = PTR_ERR(imp);
 
 	if (IS_ERR_VALUE(error)) {
-		printk(_PKE "error creating import device (%i): %i", i, -error);
+		_PKE("error creating import device (%i): %i", i, -error);
 		goto devcr_err_imp;
 	}
 
@@ -241,7 +241,7 @@ static long netchar_device_create(int i)
 	error = PTR_ERR(nd);
 	
 	if (IS_ERR_VALUE(error)) {
-		printk(_PKE "error creating netchar_device (%i): %i", i, -error);
+		_PKE("error creating netchar_device (%i): %i", i, -error);
 		goto devcr_err_nd;
 	}
 
@@ -285,7 +285,7 @@ static int __init netchar_init(void)
 {
 	int error, i = 0;
 	
-	printk(_PKI "initializing");
+	_PKI("initializing");
 
 	/* register device major/minors
 	 *
@@ -296,7 +296,7 @@ static int __init netchar_init(void)
 	error = register_chrdev_region(_DEV_FIRST, NETCHAR_NUM_DEVS*2, _MODULE_NAME);
 
 	if (error != 0) {
-		printk(_PKE "error registering major/minors: %i", -error);
+		_PKE("error registering major/minors: %i", -error);
 		goto init_err_region;
 	}
 	
@@ -313,7 +313,7 @@ static int __init netchar_init(void)
 	error = PTR_ERR(netchar_class);
 
 	if (IS_ERR_VALUE(error)) {
-		printk(_PKE "failed to create class: %i", -error);
+		_PKE("failed to create class: %i", -error);
 		goto init_err_class;
 	}
 
@@ -329,7 +329,7 @@ static int __init netchar_init(void)
 	error = PTR_ERR(netchar_cdev_ctl);
 
 	if (IS_ERR_VALUE(error)) {
-		printk(_PKE "error allocating ctl cdev: %i", -error);
+		_PKE("error allocating ctl cdev: %i", -error);
 		goto init_err_cdev_ctl;
 	}
 
@@ -348,7 +348,7 @@ static int __init netchar_init(void)
 	error = cdev_add(netchar_cdev_ctl, _DEV_FIRST_CTL, NETCHAR_NUM_DEVS);
 
 	if (error != 0) {
-		printk(_PKE "error adding ctl cdev: %i", -error);
+		_PKE("error adding ctl cdev: %i", -error);
 		goto init_err_cdev_ctl;
 	}
 
@@ -362,7 +362,7 @@ static int __init netchar_init(void)
 	error = PTR_ERR(netchar_cdev_imp);
 
 	if (IS_ERR_VALUE(error)) {
-		printk(_PKE "error allocating imp cdev: %i", -error);
+		_PKE("error allocating imp cdev: %i", -error);
 		goto init_err_cdev_imp;
 	}
 
@@ -378,7 +378,7 @@ static int __init netchar_init(void)
 	error = cdev_add(netchar_cdev_imp, _DEV_FIRST_IMP, NETCHAR_NUM_DEVS);
 
 	if (error != 0) {
-		printk(_PKE "error adding ctl cdev: %i", -error);
+		_PKE("error adding ctl cdev: %i", -error);
 		goto init_err_cdev_imp;
 	}
 
@@ -436,7 +436,7 @@ static void __exit netchar_exit(void)
 	class_destroy(netchar_class);
 	unregister_chrdev_region(_DEV_FIRST, NETCHAR_NUM_DEVS*2);
 	
-	printk(_PKI "exit");
+	_PKI("exit");
 }
 
 MODULE_LICENSE("GPL");
