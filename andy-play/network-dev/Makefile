@@ -8,6 +8,7 @@ KERNELDIR ?= /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)
 
 obj-m += chardev.o
+obj-m += netchardev.o
 
 .PHONY: build clean
 

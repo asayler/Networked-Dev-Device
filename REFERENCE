@@ -11,17 +11,19 @@
     *http://www.linuxforu.com/teach-me/a-voyage-to-the-kernel-day-11/
     *http://www.mulix.org/lectures/intro_to_linux_device_drivers/
      intro_linux_device_drivers.pdf
+    *http://free-electrons.com/docs/ - Good Updated Kernel References
+    # This is the best single resource, but it is slightly out of date
+    # you really need to suplement anything in here with reading headers
+    # (and some times source)
+    *http://lwn.net/Kernel/LDD3/
+
 ### Local Resources:
     */usr/src/linux/Documentation/kbuild/modules.txt.
 
 # Block and Character Devices
 ### Local Resources:
     */usr/src/linux/Documentation/devices.txt
-    # This is the best single resource, but it is slightly out of date
-    # you really need to suplement anything in here with reading headers
-    # (and some times source)
-    http://lwn.net/Kernel/LDD3/
-
+    
 # Kernel <-> User Space Interfaces
 ### Web Resources
     *http://www.linuxjournal.com/article/7356 - Netlink Socket
