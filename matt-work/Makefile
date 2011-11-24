@@ -12,8 +12,11 @@ netchar.ko: netchar.c netchar.h
 loopback: loopback.c netchar.h
 	gcc -Wall -g $< -o $@
 
+server: server.c netchar.h
+	gcc -Wall -O2 -g $< -o $@
+
 .PHONY: clean
 
 clean:
 	make -C $(KDIR) M=$(PWD) clean
-	$(RM) loopback
+	$(RM) loopback server
