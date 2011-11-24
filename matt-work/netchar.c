@@ -19,10 +19,10 @@
  * module parameters
 **/
 
-static u32  server = 2130706433;
-static u16  port   = 2000;
+static char*  server = "127.0.0.1";
+static u16    port   = 2000;
 
-module_param(server, uint,   S_IRUGO);
+module_param(server, charp,  S_IRUGO);
 module_param(port,   ushort, S_IRUGO);
 
 MODULE_PARM_DESC(server, "server address");
@@ -110,7 +110,7 @@ static int __init netchar_init(void)
 	memset(&server_addr, 0, sizeof(server_addr));
 	
 	server_addr.sin_family      = AF_INET;
-	server_addr.sin_addr.s_addr = htonl(server);
+	server_addr.sin_addr.s_addr = in_aton(server);
 	server_addr.sin_port        = htons(port);
 
 	/**
