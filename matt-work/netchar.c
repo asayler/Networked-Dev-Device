@@ -45,6 +45,59 @@ static struct cdev*     nc_cdev;
 static struct device*   nc_device;
 static struct socket*   nc_socket;
 
+/**
+ * read/write wrappers
+**/
+
+static int sock_write(struct socket* sock, void* buffer, size_t len)
+{
+	int            ret;
+	struct msghdr  msg;
+	struct iovec   iov;
+	mm_segment_t   oldfs;
+
+	memset(&msg, 0, sizeof(msg));
+
+	msg.msg_iov    = &iov;
+	msg.msg_iovlen = 1; 
+
+	iov.iov_base   = buffer;
+	iov.iov_len    = len;
+
+	oldfs = get_fs();
+	set_fs(KERNEL_DS);
+
+	ret = sock_sendmsg(sock, &msg, len);
+
+	set_fs(oldfs);
+
+	return ret;
+}
+
+static int sock_read(struct socket* sock, void* buffer, size_t len)
+{
+	int            ret;
+	struct msghdr  msg;
+	struct iovec   iov;
+	mm_segment_t   oldfs;
+
+	memset(&msg, 0, sizeof(msg));
+
+	msg.msg_iov    = &iov;
+	msg.msg_iovlen = 1;
+
+	iov.iov_base   = buffer;
+	iov.iov_len    = len;
+
+	oldfs = get_fs();
+	set_fs(KERNEL_DS);
+
+	ret = sock_recvmsg(sock, &msg, len, msg.msg_flags);
+
+	set_fs(oldfs);
+
+	return ret;
+}
 
 /**
  * character device fops
@@ -52,12 +105,40 @@ static struct socket*   nc_socket;
 
 static int netchar_open(struct inode* inodp, struct file* fp)
 {
-	return 0;
+	int                ret;
+	struct fop_request req;
+	struct fop_reply   rep;
+
+	_PKI("open....");
+
+	req.call  = FOP_OPEN;
+	req.flags = fp->f_flags;
+	req.mode  = fp->f_mode;
+
+	ret = sock_write(nc_socket, &req, sizeof(req));
+
+	_PKI("sendmsg: %i", ret);
+
+	ret = sock_read(nc_socket, &rep, sizeof(rep));
+
+	_PKI("recvmsg: %i", ret);
+	_PKI("open returning %i", rep.open);
+
+	rep.open = 0;
+
+	return rep.open;
 }
 
 static int netchar_release(struct inode* inodp, struct file* fp)
 {
-	return 0;
+	struct fop_request req;
+	struct fop_reply   rep;
+
+	req.call  = FOP_RELEASE;
+
+	rep.close = 0;
+
+	return rep.close;
 }
 
 static ssize_t netchar_read(struct file* fp, char *buffer,
