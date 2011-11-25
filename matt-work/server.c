@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 			printf("open(%s,%i,%i)", fpath, req.flags, req.mode);
 			
 			fd = open(fpath, req.flags, req.mode);
-			rep.open = (fd >= 0) ? 0 : -fd;
+			rep.open = (fd >= 0) ? 0 : -errno;
 			
 			printf(" -> %i\n", rep.open);
 
@@ -121,6 +121,8 @@ int main(int argc, char *argv[])
 			printf("close(%i)", fd);
 			
 			rep.close = close(fd);
+			if (rep.close != 0)
+				rep.close = -errno;
 
 			printf(" -> %i\n", rep.close);
 

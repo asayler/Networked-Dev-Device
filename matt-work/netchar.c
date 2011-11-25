@@ -109,6 +109,9 @@ static int netchar_open(struct inode* inodp, struct file* fp)
 	struct fop_request req;
 	struct fop_reply   rep;
 
+	memset(&req, 0, sizeof(req));
+	memset(&rep, 0, sizeof(rep));
+
 	_PKI("open....");
 
 	req.call  = FOP_OPEN;
@@ -124,19 +127,30 @@ static int netchar_open(struct inode* inodp, struct file* fp)
 	_PKI("recvmsg: %i", ret);
 	_PKI("open returning %i", rep.open);
 
-	rep.open = 0;
-
 	return rep.open;
 }
 
 static int netchar_release(struct inode* inodp, struct file* fp)
 {
+	int                ret;
 	struct fop_request req;
 	struct fop_reply   rep;
+	
+	memset(&req, 0, sizeof(req));
+	memset(&rep, 0, sizeof(rep));
+
+	_PKI("release...");
 
 	req.call  = FOP_RELEASE;
 
-	rep.close = 0;
+	ret = sock_write(nc_socket, &req, sizeof(req));
+
+	_PKI("sendmsg: %i", ret);
+
+	ret = sock_read(nc_socket, &rep, sizeof(rep));
+
+	_PKI("recvmsg: %i", ret);
+	_PKI("release returning %i", rep.close);
 
 	return rep.close;
 }
