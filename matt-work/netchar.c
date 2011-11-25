@@ -158,7 +158,44 @@ static int netchar_release(struct inode* inodp, struct file* fp)
 static ssize_t netchar_read(struct file* fp, char *buffer,
                             size_t length, loff_t* offset)
 {
-	return 0;
+	int                ret;
+	struct fop_request req;
+	struct fop_reply   rep;
+	void*              payload;
+
+	memset(&req, 0, sizeof(req));
+	memset(&rep, 0, sizeof(rep));
+
+	_PKI("read...");
+
+	req.call  = FOP_READ;
+	req.count = length;
+
+	ret = sock_write(nc_socket, &req, sizeof(req));
+
+	_PKI("sendmsg: %i", ret);
+
+	ret = sock_read(nc_socket, &rep, sizeof(rep));
+
+	_PKI("recvmsg: %i", ret);
+	_PKI("read returning %zi", rep.read);
+
+	if (rep.read > 0) {
+
+		payload = kmalloc(rep.read, GFP_KERNEL);
+
+		ret = sock_read(nc_socket, payload, rep.read);
+
+		_PKI("payload read returned: %i", ret);
+
+		ret = copy_to_user(buffer, payload, rep.read);
+
+		_PKI("payload copy returned: %i", ret);
+
+		kfree(payload);
+	}
+
+	return rep.read;
 }
 
 static ssize_t netchar_write(struct file* fp, const char *buffer,
