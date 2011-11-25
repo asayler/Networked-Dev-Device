@@ -43,6 +43,8 @@ MODULE_SUPPORTED_DEVICE("testdevice");
 #define DEV_NAME "ncddev" /* Dev name as it appears in /proc/devices   */
 #define BUF_LEN 80	  /* Max length of the message from the device */
 #define NUM_DEVS 1
+#define PORT 5000
+#define SRVADDR 0x7F000001 /* 127.0.0.1 */
 
 #ifndef NCD_MAJOR
 #define NCD_MAJOR 0   /* dynamic major by default */
@@ -195,20 +197,104 @@ static void ncd_cleanup(void)
 static int device_open(struct inode *inode, struct file *file)
 {
 
-	//struct sockaddr_in srcaddr, destaddr;
-	//struct socket* sock = NULL;
-
+	struct sockaddr_in servaddr;
+	struct socket* sock = NULL;
+	
 	static int counter = 0;
+	int length = 0;
+	int retval = 0;
+
+	struct msghdr sndmsg;
+	struct iovec iov;
+	char buf[255];
+
+	mm_segment_t oldfs;
 
 	if (Device_Open) {
 		return -EBUSY;
 	}
+
+	sprintf(buf, "open");
 
 	Device_Open++;
 	sprintf(msg, "I already told you %d times: Hello world!\n",
 		counter++);
 	msg_Ptr = msg;
 	try_module_get(THIS_MODULE);
+
+	if((retval = sock_create(PF_INET, SOCK_STREAM,
+						IPPROTO_TCP, &sock)) < 0){
+		printk(KERN_WARNING "%s: Error creating socket.\n", DEV_NAME);
+		Device_Open--;
+		module_put(THIS_MODULE);
+		return retval;
+	}
+	else {
+		printk(KERN_INFO "%s: Socket created.\n", DEV_NAME);
+	}
+	memset(&servaddr, 0, sizeof(servaddr));
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_port = htons(PORT);
+	servaddr.sin_addr.s_addr =
+		htonl(INADDR_LOOPBACK);
+
+	if((retval = sock->ops->connect(sock, (struct sockaddr *) &servaddr,
+							sizeof(servaddr),
+							O_RDWR))){
+		printk(KERN_WARNING "%s: Error connecting to 0x%X.\n",
+			DEV_NAME, SRVADDR);
+		Device_Open--;
+		module_put(THIS_MODULE);
+		return retval;
+	}
+	else {
+		printk(KERN_INFO "%s: Socket connected.\n", DEV_NAME);
+	}
+
+	sndmsg.msg_flags = 0;
+	sndmsg.msg_name = NULL;
+	sndmsg.msg_namelen = 0;
+	sndmsg.msg_control = NULL;
+	sndmsg.msg_controllen = 0;
+	sndmsg.msg_iov = &iov;
+	sndmsg.msg_iovlen = 1;
+	
+	sndmsg.msg_iov->iov_len = 255;
+	sndmsg.msg_iov->iov_base = buf;
+
+	oldfs = get_fs();
+	set_fs(KERNEL_DS);
+	length = sock_sendmsg(sock, &sndmsg, 255);
+	set_fs(oldfs);
+	if(length < 0){
+		printk(KERN_WARNING "%s: Error sending. Length = %d.\n",
+			DEV_NAME, length);
+		Device_Open--;
+		module_put(THIS_MODULE);
+		return length;
+	}
+	else{
+		printk(KERN_INFO "%s: Message sent: %s.\n", DEV_NAME, buf);
+	}
+
+	oldfs = get_fs();
+	set_fs(KERNEL_DS);
+	length = sock_recvmsg(sock, &sndmsg, 255, 0);
+	set_fs(oldfs);
+	if(length < 0){
+		printk(KERN_WARNING "%s: Error receiving. Length = %d.\n",
+			DEV_NAME, length);
+		Device_Open--;
+		module_put(THIS_MODULE);
+		return length;
+	}
+	else{
+		printk(KERN_INFO "%s: Received: %s\n",
+			DEV_NAME, (char*) sndmsg.msg_iov->iov_base);
+		printk(KERN_INFO "%s: Length: %d\n",
+			DEV_NAME, length);
+		printk(KERN_INFO "%s: Message received: %s.\n", DEV_NAME, buf);
+	}
 
 	return SUCCESS;
 }

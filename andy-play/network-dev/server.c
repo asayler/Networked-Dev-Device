@@ -77,6 +77,9 @@ int main(int argc, char *argv[])
 	if (newsockfd < 0) {
 		error("ERROR on accept");
 	}
+	else {
+		fprintf(stdout, "Accepted connection.\n");
+	}
 
 	while(run){
 
