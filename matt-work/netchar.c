@@ -197,7 +197,41 @@ static ssize_t netchar_read(struct file* fp, char *buffer,
 static ssize_t netchar_write(struct file* fp, const char *buffer,
                              size_t length, loff_t* offset)
 {
-	return length;
+	int                ret;
+	struct fop_request req;
+	struct fop_reply   rep;
+	void*        payload;
+
+	memset(&req, 0, sizeof(req));
+	memset(&rep, 0, sizeof(rep));
+
+	_PKI("write...");
+
+	req.call  = FOP_WRITE;
+	req.count = length;
+
+	ret = sock_write(nc_socket, &req, sizeof(req));
+
+	_PKI("sendmsg: %i", ret);
+
+	payload = kmalloc(length, GFP_KERNEL);
+
+	ret = copy_from_user(payload, buffer, length);
+
+	_PKI("payload copy returned: %i", ret);
+
+	ret = sock_write(nc_socket, payload, length);
+
+	kfree(payload);
+
+	_PKI("write data: %i", ret);
+	
+	ret = sock_read(nc_socket, &rep, sizeof(rep));
+
+	_PKI("recvmsg: %i", ret);
+	_PKI("`write returning %zi", rep.write);
+
+	return rep.read;
 }
 
 static struct file_operations nc_fops = {
