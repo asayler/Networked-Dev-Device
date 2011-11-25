@@ -107,65 +107,77 @@ int main(int argc, char *argv[])
 
 		case FOP_OPEN:
 
-			printf("open(%s,%i,%i)", fpath, req.flags, req.mode);
+			printf("request: open(%s, flags=%i, mode=%i)\n",
+			       fpath, req.flags, req.mode);
 			
 			fd = open(fpath, req.flags, req.mode);
-			rep.open = (fd >= 0) ? 0 : -errno;
+			printf("\tfd = %i\n", fd);
 			
-			printf(" -> %i\n", rep.open);
+			rep.open = (fd >= 0) ? 0 : -errno;
+			printf("\treply: %i\n", rep.open);
 
 			break;
 
 		case FOP_RELEASE:
 
-			printf("close(%i)", fd);
-			
+			printf("request: close()\n");
+			printf("\tfd == %i\n", fd);
+
 			rep.close = close(fd);
 			if (rep.close != 0)
 				rep.close = -errno;
 
-			printf(" -> %i\n", rep.close);
+			printf("\treply: %i\n", rep.close);
 
 			break;
 
 		case FOP_READ:
 
-			printf("read(%i, <buf>, %zi)", fd, req.count);
+			printf("request: read(count=%zi)\n", req.count);
+			printf("\tfd == %i\n", fd);
 
 			payload = realloc(payload, req.count);
-			
-			if (payload == NULL) {
-				/* TODO let client know */
-				fprintf(stderr, "error allocating mem for payload\n");
-				exit(EXIT_FAILURE);
-			}
 
+			if (payload == NULL) {
+				printf("\terror allocating payload: %s\n",
+				       strerror(errno));
+				rep.call = _FOP_ERROR;
+				rep.read = -EIO;
+				break;
+			}
+			
 			rep.read = read(fd, payload, req.count);
 
 			if (rep.read < 0)
 				rep.read = -errno;
-			
-			printf(" -> %zi\n", rep.read);
 
+			printf("\treply: %zi\n", rep.read);
+			
 			break;
 
 		case FOP_WRITE:
 
-			printf("write(%i, <buf>, %zi)", fd, req.count);
-			
+			printf("request: write(count=%zi)\n", req.count);
+			printf("\tfd == %i\n", fd);
+
 			payload = realloc(payload, req.count);
 		
 			if (payload == NULL) {
-				/* TODO let client know */
-				fprintf(stderr, "error allocating mem for payload\n");
-				exit(EXIT_FAILURE);
+				printf("\terror allocating payload: %s\n",
+				       strerror(errno));
+				rep.call = _FOP_ERROR;
+				rep.read = -EIO;
+				break;
 			}
 			
 			err = read(sd, payload, req.count);
 		
 			if (err < 0) {
-				perror("error reading from rx_buffer for write");
-				exit(EXIT_FAILURE);
+				printf("\terror reading rom rx_buffer: %s\n",
+				       strerror(errno));
+				rep.call = _FOP_ERROR;
+				rep.read = -EIO;
+				break;
 			}
 
 			rep.write = write(fd, payload, req.count);
@@ -173,25 +185,26 @@ int main(int argc, char *argv[])
 			if (rep.write < 0)
 				rep.write = -errno;
 			
-			printf(" -> %zi\n", rep.write);
+			printf("\treply: %zi\n", rep.write);
 
 			break;
 
 		default:
 
-			printf("unknown fop: %i\n", req.call);
+			printf("unknown request fop: %i\n", req.call);
 			rep.call = _FOP_ERROR;
 		}
 
-		
+		printf("\n");
+
 		if (rep.call != _FOP_ERROR)
 			rep.call = req.call;
 
 		err = write(sd, &rep, sizeof(rep));
 
 		if (err < sizeof(rep)) {
-			perror("error writing rep");
-			exit(EXIT_FAILURE);
+			perror("error writing reply");
+			continue;
 		}
 
 		if (rep.call == FOP_READ && rep.read > 0) {
@@ -199,8 +212,8 @@ int main(int argc, char *argv[])
 			err = write(sd, payload, rep.read);
 			
 			if (err != rep.read) {
-				perror("error writing rep payload");
-				exit(EXIT_FAILURE);
+				perror("error writing read payload");
+				continue;
 			}
 		}
 
