@@ -13,8 +13,6 @@
 
 #include "netchar.h"
 
-#include <linux/delay.h>
-
 /**
  * module parameters
 **/
@@ -33,8 +31,6 @@ MODULE_PARM_DESC(port,   "port number");
 **/
 
 #define _MODULE_NAME       "netchar"
-#define _MAJOR             27
-#define _DEV_FIRST         MKDEV(_MAJOR,0)
 
 #define _PKE(fmt,args...)  printk(KERN_ERR  _MODULE_NAME ": " fmt , ## args)
 #define _PKI(fmt,args...)  printk(KERN_INFO _MODULE_NAME ": " fmt , ## args)

@@ -1,8 +1,6 @@
 #ifndef _NETCHAR_H_
 #define _NETCHAR_H_
 
-#define NETCHAR_NUM_DEVS    10
-
 enum {
 	FOP_OPEN, FOP_RELEASE,
 	FOP_READ, FOP_WRITE,
