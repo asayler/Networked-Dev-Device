@@ -22,9 +22,9 @@ int main(int argc, char *argv[])
 	struct fop_reply    rep;
 	void*               payload = NULL;
 
-	/**
+	/*
 	 * parse command line
-	**/
+	 */
 
 	if (argc != 3) {
 		fprintf(stderr, "usage: %s port filepath\n", argv[0]);
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
 
 		err = write(sd, &rep, sizeof(rep));
 
-		if (err < sizeof(rep)) {
+		if (err < (int) sizeof(rep)) {
 			perror("error writing reply");
 			continue;
 		}

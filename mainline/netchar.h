@@ -1,15 +1,20 @@
 #ifndef _NETCHAR_H_
 #define _NETCHAR_H_
 
-enum {
+enum FOPS{
 	FOP_OPEN, FOP_RELEASE,
 	FOP_READ, FOP_WRITE,
 	_FOP_ERROR
 };
 
+enum TESTS{
+	TEST1,
+	TEST2
+};
+
 struct fop_request {
 
-	int       call;
+	enum FOPS call;
 	size_t    seq;
 
 	union {
@@ -24,8 +29,8 @@ struct fop_request {
 
 struct fop_reply {
 
-	int      call;
-	size_t   seq;
+	enum FOPS call;
+	size_t    seq;
 
 	union {
 		int      open;
