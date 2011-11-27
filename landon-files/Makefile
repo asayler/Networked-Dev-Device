@@ -5,7 +5,7 @@ EXTRA_CFLAGS = -Wall
 KERNELDIR ?= /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)
 
-obj-m := hellomodule.o
+obj-m := hi.o
 
 .PHONY: build clean
 
