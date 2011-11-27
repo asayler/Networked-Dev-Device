@@ -15,7 +15,6 @@ enum TESTS{
 struct fop_request {
 
 	enum FOPS call;
-	size_t    seq;
 
 	union {
 		struct {
@@ -30,7 +29,6 @@ struct fop_request {
 struct fop_reply {
 
 	enum FOPS call;
-	size_t    seq;
 
 	union {
 		int      open;
