@@ -213,14 +213,6 @@ static ssize_t netchar_write(struct file* fp, const char *buffer,
 	return rep.read;
 }
 
-static struct file_operations nc_fops = {
-	.owner   = THIS_MODULE,
-	.open    = netchar_open,
-	.release = netchar_release,
-	.read    = netchar_read,
-	.write   = netchar_write,
-};
-
 /**
  * module basics
 **/
@@ -382,11 +374,3 @@ static void __exit netchar_exit(void)
 	
 	_PKI("exit");
 }
-
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Matthew Monaco <matthew.monaco@0x01b.net>, Andy, Landon");
-MODULE_DESCRIPTION("Network character device (client)");
-
-module_init(netchar_init);
-module_exit(netchar_exit);
-

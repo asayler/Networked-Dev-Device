@@ -27,6 +27,7 @@ server.o: server.c netcharproto.h
 
 clean:
 	$(MAKE) -C $(KDIR) M=$(PWD) clean
-	$(RM) -f server
-	$(RM) -f *.o
-	$(RM) -f *~
+	$(RM) server
+	$(RM) *.o
+	$(RM) *~
+	$(RM) \#*\#
