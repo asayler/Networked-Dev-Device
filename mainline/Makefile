@@ -16,13 +16,13 @@ all: server modules
 
 modules: netchar.ko
 
-netchar.ko: netchar.c netchar.h
+netchar.ko: netchar.c netcharmod.h netcharproto.h
 	$(MAKE) -C $(KDIR) M=$(PWD) $@
 
 server: server.o
 	$(CC) $(LOCAL_LFLAGS) -o $@ $<
 
-server.o: server.c netchar.h
+server.o: server.c netcharproto.h
 	$(CC) $(LOCAL_CFLAGS) -o $@ $<
 
 clean:

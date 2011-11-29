@@ -1,3 +1,9 @@
+/* netchar.h - netchar client module
+ * kernel module file
+ * Matthew Monaco
+ * Andy Sayler
+ */
+
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
@@ -11,35 +17,8 @@
 #include <linux/net.h>
 #include <linux/in.h>
 
-#include "netchar.h"
-
-/**
- * module parameters
-**/
-
-static char*  server = "127.0.0.1";
-static u16    port   = 2000;
-
-module_param(server, charp,  S_IRUGO);
-module_param(port,   ushort, S_IRUGO);
-
-MODULE_PARM_DESC(server, "server address");
-MODULE_PARM_DESC(port,   "port number");
-
-/**
- * local header
-**/
-
-#define _MODULE_NAME       "netchar"
-
-#define _PKE(fmt,args...)  printk(KERN_ERR  _MODULE_NAME ": " fmt , ## args)
-#define _PKI(fmt,args...)  printk(KERN_INFO _MODULE_NAME ": " fmt , ## args)
-
-static dev_t            nc_dev_t;
-static struct class*    nc_class;
-static struct cdev*     nc_cdev;
-static struct device*   nc_device;
-static struct socket*   nc_socket;
+#include "netcharproto.h"
+#include "netcharmod.h"
 
 /**
  * read/write wrappers

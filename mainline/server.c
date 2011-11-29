@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include "netchar.h"
+#include "netcharproto.h"
 
 
 int main(int argc, char *argv[])

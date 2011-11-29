@@ -1,15 +1,20 @@
+/* netcharproto.h - netchar client module
+ * protocall header file
+ * Matthew Monaco
+ * Andy Sayler
+ */
+
 #ifndef _NETCHAR_H_
 #define _NETCHAR_H_
+
+#ifndef NCD_PORT
+#define NCD_PORT 2000   /* default port */
+#endif
 
 enum FOPS{
 	FOP_OPEN, FOP_RELEASE,
 	FOP_READ, FOP_WRITE,
 	_FOP_ERROR
-};
-
-enum TESTS{
-	TEST1,
-	TEST2
 };
 
 struct fop_request {
