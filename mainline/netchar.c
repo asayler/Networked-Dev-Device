@@ -233,7 +233,6 @@ static int __init netchar_init(void)
 	if (error != 0) {
 		_PKE("error creating socket: %i", error);
 		goto init_err_sock_create;
-		
 	}
 
 	/**
@@ -250,7 +249,8 @@ static int __init netchar_init(void)
 	 * connect to server
 	**/
 
-	error = nc_socket->ops->connect(nc_socket, (struct sockaddr*) &server_addr,
+	error = nc_socket->ops->connect(nc_socket,
+					(struct sockaddr*) &server_addr,
 			                sizeof(server_addr), 0);
 
 	if (error != 0) {
@@ -258,27 +258,38 @@ static int __init netchar_init(void)
 		goto init_err_connect;
 	}
 
-	/**
-	 * reserve a randomly allocated dev_t major/minor number
-	**/
+        /*
+	 * Get a range of minor numbers to work with, asking for a dynamic
+	 * major unless directed otherwise at load time.
+	 */
 
-	error = alloc_chrdev_region(&nc_dev_t, 0, 1, _MODULE_NAME);
+	if (ncd_major) {
+		/* Static Major */
+		nc_dev_t = MKDEV(ncd_major, ncd_minor);
+		error = register_chrdev_region(nc_dev_t, num_devs,
+					_MODULE_NAME);
+	} else {
+		/* Dynamic Major */
+		error = alloc_chrdev_region(&nc_dev_t, ncd_minor, num_devs,
+					_MODULE_NAME);
+		ncd_major = MAJOR(nc_dev_t);
+	}
 
 	if (error != 0) {
 		_PKE("error registering major/minors: %i", error);
 		goto init_err_region;
 	}
 
-	/**
+	/*
 	 * create device class (subsystem)
 	 *
 	 * this creates a class to which all of our devices will belong (both
-	 * control devices and import devices). besides that it is required for
-	 * a device to have a class, it gives us the SUBSYSTEM tag in udev so
-	 * we can change the permissions on all /dev nones of interest
-	**/
+	 * control devices and import devices). besides that it is required
+	 * for a device to have a class, it gives us the SUBSYSTEM tag in
+	 * udev so we can change the permissions on all /dev nones of interest
+	 */
 
-	nc_class = class_create(THIS_MODULE, "netchar");
+	nc_class = class_create(THIS_MODULE, _MODULE_NAME);
 	error = PTR_ERR(nc_class);
 
 	if (IS_ERR_VALUE(error)) {
@@ -289,7 +300,8 @@ static int __init netchar_init(void)
 	/**
 	 * setup cdev 
 	 *
-	 * the cdev ties a set of file_operations (handlers for fs system calls)
+	 * the cdev ties a set of file_operations
+	 * (handlers for fs system calls)
 	 * to a range of major,minor pairs.
 	**/
 

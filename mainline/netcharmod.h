@@ -23,6 +23,10 @@
 #define NCD_MINOR 0   /* first minor by default */
 #endif
 
+#ifndef NUM_DEVS
+#define NUM_DEVS 1   /* number of devices */
+#endif
+
 #ifndef NCD_SERVER_ADDR
 #define NCD_SERVER_ADDR "127.0.0.1"   /* default to localhost */
 #endif
@@ -36,6 +40,9 @@
 
 static char*  server = NCD_SERVER_ADDR;
 static u16    port   = NCD_PORT;
+static int ncd_major = NCD_MAJOR;
+static int ncd_minor = NCD_MINOR;
+static int num_devs  = NUM_DEVS;
 static dev_t            nc_dev_t;
 static struct class*    nc_class;
 static struct cdev*     nc_cdev;
@@ -48,12 +55,16 @@ module_param(server, charp,  S_IRUGO);
 MODULE_PARM_DESC(server, "server address");
 module_param(port,   ushort, S_IRUGO);
 MODULE_PARM_DESC(port,   "port number");
+module_param(ncd_major, int, S_IRUGO);
+MODULE_PARM_DESC(ncd_major,   "major number (0 for dynamic)");
+module_param(ncd_minor, int, S_IRUGO);
+MODULE_PARM_DESC(ncd_minor,   "first minor number");
 
 /* Module Metadata */
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Matthew Monaco <matthew.monaco@0x01b.net>,"
-	      "Andy Sayler <andy.sayler@gmail.com>,"
+MODULE_AUTHOR("Matthew Monaco <matthew.monaco@0x01b.net>, "
+	      "Andy Sayler <andy.sayler@gmail.com>, "
 	      "Landon");
 MODULE_DESCRIPTION("Network character device module (client)");
 
