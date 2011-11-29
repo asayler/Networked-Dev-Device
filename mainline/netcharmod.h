@@ -59,6 +59,8 @@ module_param(ncd_major, int, S_IRUGO);
 MODULE_PARM_DESC(ncd_major,   "major number (0 for dynamic)");
 module_param(ncd_minor, int, S_IRUGO);
 MODULE_PARM_DESC(ncd_minor,   "first minor number");
+module_param(num_devs, int, S_IRUGO);
+MODULE_PARM_DESC(num_devs,   "number of minor devices");
 
 /* Module Metadata */
 
