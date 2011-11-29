@@ -136,7 +136,7 @@ static ssize_t netchar_read(struct file* fp, char *buffer,
 	int                ret;
 	struct fop_request req;
 	struct fop_reply   rep;
-	void*              payload;
+	void*              payload = NULL;
 
 	memset(&req, 0, sizeof(req));
 	memset(&rep, 0, sizeof(rep));
@@ -158,6 +158,10 @@ static ssize_t netchar_read(struct file* fp, char *buffer,
 	if (rep.read > 0) {
 
 		payload = kmalloc(rep.read, GFP_KERNEL);
+		if(payload == NULL){
+			_PKA("Read Error: kmalloc returned NULL");
+			return 0;
+		}
 
 		ret = sock_read(nc_socket, payload, rep.read);
 
@@ -168,6 +172,7 @@ static ssize_t netchar_read(struct file* fp, char *buffer,
 		_PKI("payload copy returned: %i", ret);
 
 		kfree(payload);
+		payload = NULL;
 	}
 
 	return rep.read;
@@ -179,7 +184,7 @@ static ssize_t netchar_write(struct file* fp, const char *buffer,
 	int                ret;
 	struct fop_request req;
 	struct fop_reply   rep;
-	void*        payload;
+	void*        payload = NULL;
 
 	memset(&req, 0, sizeof(req));
 	memset(&rep, 0, sizeof(rep));
@@ -194,7 +199,11 @@ static ssize_t netchar_write(struct file* fp, const char *buffer,
 	_PKI("sendmsg: %i", ret);
 
 	payload = kmalloc(length, GFP_KERNEL);
-
+	if(payload == NULL){
+		_PKA("Write Error: kmalloc returned NULL");
+		return 0;
+	}
+	
 	ret = copy_from_user(payload, buffer, length);
 
 	_PKI("payload copy returned: %i", ret);
@@ -202,6 +211,7 @@ static ssize_t netchar_write(struct file* fp, const char *buffer,
 	ret = sock_write(nc_socket, payload, length);
 
 	kfree(payload);
+	payload = NULL;
 
 	_PKI("write data: %i", ret);
 	

@@ -35,6 +35,7 @@
 
 #define _PKE(fmt,args...)  printk(KERN_ERR  _MODULE_NAME ": " fmt , ## args)
 #define _PKI(fmt,args...)  printk(KERN_INFO _MODULE_NAME ": " fmt , ## args)
+#define _PKA(fmt,args...)  printk(KERN_ALERT _MODULE_NAME ": " fmt , ## args)
 
 /* Module Global Vars */
 
