@@ -14,3 +14,14 @@
 *.tmp*
 .*.cmd
 matt-work/server
+
+#Paper/Presentation
+
+paper/*.pdf
+*.aux
+*.out
+*.aux
+*.bbl
+*.blg
+*.log
+*.dvi
