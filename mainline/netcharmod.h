@@ -68,7 +68,7 @@ MODULE_PARM_DESC(num_devs,   "number of minor devices");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Matthew Monaco <matthew.monaco@0x01b.net>, "
 	      "Andy Sayler <andy.sayler@gmail.com>, "
-	      "Landon");
+	      "Landon Spear <landon.spear@colorado.edu>");
 MODULE_DESCRIPTION("Network character device module (client)");
 
 /* Module Prototypes */
