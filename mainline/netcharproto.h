@@ -43,4 +43,17 @@ struct fop_reply {
 	};
 };
 
+enum nc_cmd {
+	NC_CMD_ADD,
+	NC_CMD_RM,
+};
+
+struct nc_admin {
+	enum nc_cmd cmd;
+
+	long       address;
+	short      port;
+	char       name[1024];
+};
+
 #endif /* _NETCHAR_H_ */

@@ -12,7 +12,7 @@ obj-m += netchar.o
 
 .PHONY: all clean modules
 
-all: server modules
+all: server modules ncadmin
 
 modules: netchar.ko
 
@@ -25,9 +25,15 @@ server: server.o
 server.o: server.c netcharproto.h
 	$(CC) $(LOCAL_CFLAGS) -o $@ $<
 
+ncadmin: ncadmin.o
+	$(CC) $(LOCAL_LFLAGS) -o $@ $<
+
+ncadmin.o: ncadmin.c netcharproto.h
+	$(CC) $(LOCAL_CFLAGS) -o $@ $<
+
 clean:
 	$(MAKE) -C $(KDIR) M=$(PWD) clean
-	$(RM) server
+	$(RM) server ncadmin
 	$(RM) *.o
 	$(RM) *~
 	$(RM) \#*\#

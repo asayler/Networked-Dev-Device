@@ -14,6 +14,8 @@
 *.tmp*
 .*.cmd
 matt-work/server
+mainline/server
+mainline/ncadmin
 
 #Paper/Presentation
 
