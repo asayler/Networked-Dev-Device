@@ -27,3 +27,6 @@ paper/*.pdf
 *.blg
 *.log
 *.dvi
+*.nav
+*.snm
+*.toc
