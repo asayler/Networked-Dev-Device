@@ -13,6 +13,20 @@
 
 \bibliographystyle{plain}
 
+\newenvironment{packed_enum}{
+\begin{enumerate}
+  \setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}{\end{enumerate}}
+
+\newenvironment{packed_item}{
+\begin{itemize}
+  \setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}{\end{itemize}}
+
 \begin{document}
 
 \title{Networked Character Devices}
@@ -29,10 +43,12 @@ Lorem ipsum
 % Landon Sections
 
 \section{Introduction}
+\label{sec:introduction}
 
 We did some stuff, we used some references \cite{ldd3}.
 
 \section{Related Work}
+\label{sec:relatedwork}
 
 We are unique.
 
@@ -40,18 +56,81 @@ We are unique.
 
 % Combine Architecture and System?
 \section{Architecture}
+\label{sec:architecture}
 
 \section{System}
+\label{sec:system}
 
 \section{Implementation}
+\label{sec:implementation}
 
 % Andy Sections
 
 \section{Results and Evaluation}
+\label{sec:results}
+
+The Network Character Device system is still a work in
+progress. We will need to Expand the system beyond it's current state
+before the NCD concept is ready for production-level use.
+
+Non the less, we have gained many insights into the advantages such a
+system might provide. We have also encountered the difficulties
+implementing such a system into an existing OS like Linux entails.
+
+\subsection{Current Status}
+\label{sec:currentstatus}
+
+As of this writing, we have completed a partial implementation of
+the Network Character Device system. Current functionality includes:
+
+\begin{packed_item}
+\item Support for exporting a single character device from the server
+\item Support for importing a single character device on the client
+\item Client-side kernel-space Linux module implementation
+\item Server-side user-space background process implementation
+\item Support for open, close, read, and write calls
+\item Basic Linux udev support for automatic node creation on client
+\end{packed_item}
+
+This set of core functionality provides a working proof-of-concept
+Network Character Device system. This system fully supports the
+export of a single character device from server to client over the
+network and demonstrates the basic use and utility of such a system.
+
+It should be noted, however, that some work is still required before
+the Network Character device system can be considered a production
+ready utility. Most notably, the following features are necessary for
+a fully functional NCD system, but are not yet included in our
+implementation:
+
+\begin{packed_item}
+\item Multi-device, multi-server client-side import support
+\item Multi-device server-side export support
+\item Support for exclusive use and protection of exported devices
+\item Support for ioctl calls
+\item Support for providing and obtaining metadata for exported
+  devices
+\item Support for ``advertisement'' of available exported devices
+\item Support for integrating imported devices into other kernel
+  subsystems (human interface subsystem, audio subsystem, etc)
+\item Addition of ``NCD-admin'' utilities for managing and administering
+  NCD system
+\end{packed_item}
+
+Section \ref{sec:futurework} provides some insight into the addition
+of some of these expanded features.
+
+\subsection{Advantages}
+\label{sec:advantages}
+
+\subsection{Challenges}
+\label{sec:challenges}
 
 \section{Future Work}
+\label{sec:futurework}
 
 \section{Conclusion}
+\label{sec:conclusion}
 
 \bibliography{refs}
 
