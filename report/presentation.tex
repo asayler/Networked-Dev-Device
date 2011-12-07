@@ -4,8 +4,8 @@
 % Landon Spear
 
 \documentclass[xcolor=dvipsnames]{beamer}
-%\useoutertheme{default}
-%\usetheme{Boadilla}
+\usetheme{AnnArbor}
+\usecolortheme{beaver}
 \setbeamercovered{transparent=25}
 \setbeamertemplate{blocks}[rounded][shadow=false] 
 \setbeamertemplate{navigation symbols}{}
@@ -52,14 +52,12 @@
 
 \title[NCD]{Networked Character Devices}
 %\subtitle[]{}
-\author[ M. Monaco \& A. Sayler \& L Spear]{Matthew Monaco \&
-                                            Andy Sayler \&
-                                            Landon Spear}
-\institute[University of Colorado]{
-  University of Colorado\\
-  \texttt{matthew.monaco@colorado.edu}\\*
-  \texttt{andrew.sayler@colorado.edu}\\*
-  \texttt{landon.spear@colorado.edu}
+\author[Monaco, Sayler, Spear]{Matthew Monaco \&
+                               Andy Sayler \&
+                               Landon Spear}
+\institute[CU-Boulder]{
+  University of Colorado at Boulder \\
+  \texttt{\{first.last\}@colorado.edu}
 }
 \date[Dec. 10, 2011]{Saturday, December 10\textsuperscript{th}, 2011}
 
@@ -68,6 +66,10 @@
 %---Title Slide---%
 \begin{frame}[plain]
   \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
 \end{frame}
 
 %Landon - Beginning
@@ -87,7 +89,11 @@
 % Combine Architecture and System?
 \section{Architecture}
 
-\section{System}
+\begin{frame}
+Line one
+\pause
+Line two
+\end{frame}
 
 \section{Implementation}
 
@@ -100,7 +106,7 @@
 
 \end{frame}
 
-% Andy - End
+% Matt - End
 
 % Andy Sections
 
@@ -159,3 +165,5 @@
 \end{frame}
 
 \end{document}
+
+% vim: set sw=2 ts=2 et : %

@@ -19,7 +19,7 @@ mainline/ncadmin
 
 #Paper/Presentation
 
-paper/*.pdf
+report/*.pdf
 *.aux
 *.out
 *.aux
