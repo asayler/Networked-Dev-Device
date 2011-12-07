@@ -10,8 +10,29 @@
 \usepackage[text={6in, 9in}, centering]{geometry}
 \usepackage{graphicx}
 \usepackage{url}
+\usepackage{listings}
 
 \bibliographystyle{plain}
+
+\lstloadlanguages{C}
+\lstset{
+  language=C,
+  basicstyle=\footnotesize,
+  numbers=none,
+  numberstyle=\footnotesize,
+  stepnumber=1,
+  numbersep=5pt,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  tabsize=4,
+  captionpos=b,
+  breaklines=true,
+  breakatwhitespace=false,
+  title=\lstname,
+  frame=single,
+  frameround=tttt
+}
 
 \newenvironment{packed_enum}{
 \begin{enumerate}
@@ -57,6 +78,10 @@ We are unique.
 % Combine Architecture and System?
 \section{Architecture}
 \label{sec:architecture}
+
+\lstinputlisting[float=*,
+  caption={Listing Code Sample},
+  label=lst:codeSample.c]{codesample.c}
 
 \section{System}
 \label{sec:system}
