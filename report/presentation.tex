@@ -16,7 +16,6 @@
 
 \bibliographystyle{plain}
 
-
 \lstloadlanguages{C}
 \lstset{
   language=C,
@@ -37,6 +36,19 @@
   frameround=tttt
 }
 
+\newenvironment{packed_enum}{
+\begin{enumerate}
+  \setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}{\end{enumerate}}
+
+\newenvironment{packed_item}{
+\begin{itemize}
+  \setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}{\end{itemize}}
 
 \title[NCD]{Networked Character Devices}
 %\subtitle[]{}
@@ -66,7 +78,18 @@
   We did some stuff, we used some references \cite{ldd3}.
 \end{frame}
 
+\section{Introduction}
+
+\section{Related Work}
+
 % Matt - Middle
+
+% Combine Architecture and System?
+\section{Architecture}
+
+\section{System}
+
+\section{Implementation}
 
 %---Code Sample Slide---%
 \begin{frame}{\bf Code Sample}
@@ -79,6 +102,53 @@
 
 % Andy - End
 
+% Andy Sections
+
+\section{Results and Evaluation}
+%---Current State Slide---%
+\begin{frame}{\bf Current State}
+
+\begin{packed_item}
+\item Supports exporting a single character device from the server
+\item Supports importing a single character device on the client
+\item Supports open, close, read, and write calls
+\item Supports basic Linux udev operation for automatic node creation on client
+\end{packed_item}
+
+\end{frame}
+
+%---ToDo Slide---%
+\begin{frame}{\bf ToDo}
+
+\begin{packed_item}
+\item Multi-device, multi-server client-side import support
+\item Multi-device server-side export support
+\item Support for exclusive use and protection of exported devices
+\item Support for ioctl calls
+\item Support for providing and obtaining metadata for exported
+  devices
+\item Support for ``advertisement'' of available exported devices
+\item Support for integrating imported devices into other kernel
+  subsystems (human interface subsystem, audio subsystem, etc)
+\item Addition of ``NCD-admin'' utilities for managing and administering
+  NCD system
+\end{packed_item}
+
+\end{frame}
+
+%---Advantages Slide---%
+\begin{frame}{\bf Advantages}
+
+\end{frame}
+
+%---Challenges Slide---%
+\begin{frame}{\bf Challenges}
+
+\end{frame}
+
+\section{Future Work}
+
+\section{Conclusion}
 
 \section{Bibliography}
 %---Bibliography---%
