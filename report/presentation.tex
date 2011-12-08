@@ -116,6 +116,19 @@
   \end{itemize}
 \end{frame}
 
+\begin{frame}[c]{Server Medium Level}
+  \includegraphics[width=0.8\textwidth]{arch-02.png}
+  \begin{itemize}
+    \item<1-> Listen on a specified port
+    \item<2-> Receive requests from client
+    \begin{itemize}
+      \item<2-> open,close,read,write,...
+    \end{itemize}
+    \item<3-> Can actually export \textit{any} file
+    \item<4-> Crashes ungracefully when the client disconnects
+  \end{itemize}
+\end{frame}
+
 \section{Implementation}
 
 %---Code Sample Slide---%
