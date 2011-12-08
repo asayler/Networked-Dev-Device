@@ -92,7 +92,18 @@
 \begin{frame}[c]{Very High Level}
   \includegraphics[width=0.8\textwidth]{arch-01.png}
 
-  Our system uses a basic client server model
+  \begin{itemize}
+    \item Our system uses a basic client server model
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[c]{High Level}
+  \includegraphics[width=0.8\textwidth]{arch-02.png}
+
+  \begin{itemize}
+    \item<1-> The server side resides entirely in a single kernel module
+    \item<2-> The client side is a standard userspace server
+  \end{itemize}
 \end{frame}
 
 \section{Implementation}
