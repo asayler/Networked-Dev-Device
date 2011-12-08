@@ -1,5 +1,5 @@
 
-PRESENTATION_INCLUDES = arch-01.svg arch-02.svg arch-03.svg
+PRESENTATION_INCLUDES = arch-01.svg arch-02.svg arch-03.svg system-full.svg system-working.svg
 PAPER_INCLUDES =
 
 INC_PATH = inc/
@@ -13,6 +13,7 @@ all: paper presentation
 
 clean:
 	$(RM) *.aux *.bbl *.blg *.dvi *.log *.out *.nav *.snm *.toc *~
+	$(RM) inc/*.png
 
 allclean: clean
 	$(RM) paper.pdf presentation.pdf
