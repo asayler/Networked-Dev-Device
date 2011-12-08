@@ -53,7 +53,7 @@
 \title[NCD]{Networked Character Devices}
 %\subtitle[]{}
 \author[Monaco, Sayler, Spear]{Matthew Monaco \&
-                               Andy Sayler \&
+                               Andrew Sayler \&
                                Landon Spear}
 \institute[CU-Boulder]{
   University of Colorado at Boulder \\
@@ -132,22 +132,37 @@
 % Andy Sections
 
 \section{Results and Evaluation}
+%---Full State Slide---%
+
+\begin{frame}[c]{Full System}
+  \begin{center}
+    \includegraphics[height=0.75\paperheight,keepaspectratio]{system-full.png}
+  \end{center}
+\end{frame}
+
+%---Current State Image Slide---%
+\begin{frame}[c]{Current State}
+  \begin{center}
+    \includegraphics[height=0.75\paperheight,keepaspectratio]{system-working.png}
+  \end{center}
+\end{frame}
+
 %---Current State Slide---%
 \begin{frame}{\bf Current State}
 
-\begin{packed_item}
-\item Supports exporting a single character device from the server
-\item Supports importing a single character device on the client
-\item Supports open, close, read, and write calls
-\item Supports basic Linux udev operation for automatic node creation on client
-\end{packed_item}
+\begin{itemize}
+\item<1-> Supports exporting a single character device from the server
+\item<2-> Supports importing a single character device on the client
+\item<3-> Supports open, close, read, and write calls
+\item<4-> Supports basic Linux udev operation for automatic node creation on client
+\end{itemize}
 
 \end{frame}
 
 %---ToDo Slide---%
 \begin{frame}{\bf ToDo}
 
-\begin{packed_item}
+\begin{itemize}
 \item Multi-device, multi-server client-side import support
 \item Multi-device server-side export support
 \item Support for exclusive use and protection of exported devices
@@ -159,7 +174,7 @@
   subsystems (human interface subsystem, audio subsystem, etc)
 \item Addition of ``NCD-admin'' utilities for managing and administering
   NCD system
-\end{packed_item}
+\end{itemize}
 
 \end{frame}
 
