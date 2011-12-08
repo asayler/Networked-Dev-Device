@@ -1,5 +1,5 @@
 
-PRESENTATION_INCLUDES = arch-01.svg arch-02.svg
+PRESENTATION_INCLUDES = arch-01.svg arch-02.svg arch-03.svg
 PAPER_INCLUDES =
 
 INC_PATH = inc/

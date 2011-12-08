@@ -93,7 +93,8 @@
   \includegraphics[width=0.8\textwidth]{arch-01.png}
 
   \begin{itemize}
-    \item Our system uses a basic client server model
+    \item<1-> Our system uses a basic client server model
+    \item<2-> The client initiates all exchanges, the server replies
   \end{itemize}
 \end{frame}
 
@@ -103,6 +104,15 @@
   \begin{itemize}
     \item<1-> The server side resides entirely in a single kernel module
     \item<2-> The client side is a standard userspace server
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[c]{Server Medium Level}
+  \includegraphics[width=0.4\textwidth]{arch-03.png}
+
+  \begin{itemize}
+    \item<1-> By default, devices are exposed under /dev/netchar
+    \item<2-> In the future, we should be able to choose any name
   \end{itemize}
 \end{frame}
 
