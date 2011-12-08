@@ -3,8 +3,8 @@ PRESENTATION_INCLUDES = arch-01.svg arch-02.svg
 PAPER_INCLUDES =
 
 INC_PATH = inc/
-PRESENTATION_INCLUDES := $(addprefix $(INC_PATH), $(PRESENTATION_INCLUDES))
-PAPER_INCLUDES        := $(addprefix $(INC_PATH), $(PAPER_INCLUDES))
+PRESENTATION_INCLUDES := $(addprefix $(INC_PATH), $(PRESENTATION_INCLUDES:%.svg=%.png))
+PAPER_INCLUDES        := $(addprefix $(INC_PATH), $(PAPER_INCLUDES:%.svg=%.png))
 export TEXINPUTS := .:./$(INC_PATH)/:$(TEXINPUTS)
 
 .PHONY: all clean allclean
