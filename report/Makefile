@@ -1,3 +1,12 @@
+
+PRESENTATION_INCLUDES =
+PAPER_INCLUDES =
+
+INC_PATH = inc/
+PRESENTATION_INCLUDES := $(addprefix $(INC_PATH), $(PRESENTATION_INCLUDES))
+PAPER_INCLUDES        := $(addprefix $(INC_PATH), $(PAPER_INCLUDES))
+export TEXINPUTS := .:./$(INC_PATH)/:$(TEXINPUTS)
+
 .PHONY: all clean allclean
 
 all: paper presentation
@@ -19,7 +28,7 @@ paper.pdf: paper.aux paper.bbl
 paper.bbl: paper.aux refs.bib
 	bibtex paper.aux
 
-paper.aux: paper.tex
+paper.aux: paper.tex $(PAPER_INCLUDES)
 	pdflatex paper.tex
 
 .PHONY: presentation
@@ -33,5 +42,10 @@ presentation.pdf: presentation.aux presentation.bbl
 presentation.bbl: presentation.aux refs.bib
 	bibtex presentation.aux
 
-presentation.aux: presentation.tex
+presentation.aux: presentation.tex $(PRESENTATION_INCLUDES)
 	pdflatex presentation.tex
+
+# figures
+
+%.png: %.svg
+	inkscape -e $@ $<

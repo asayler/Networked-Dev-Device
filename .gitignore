@@ -20,6 +20,8 @@ mainline/ncadmin
 #Paper/Presentation
 
 report/*.pdf
+report/inc/*.png
+report/inc/*.pdf
 *.aux
 *.out
 *.aux
