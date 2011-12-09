@@ -8,6 +8,10 @@ PRESENTATION_INCLUDES := $(addprefix $(INC_PATH), $(PRESENTATION_INCLUDES:%.svg=
 PAPER_INCLUDES        := $(addprefix $(INC_PATH), $(PAPER_INCLUDES:%.svg=%.png))
 export TEXINPUTS := .:./$(INC_PATH)/:$(TEXINPUTS)
 
+BIBTEX    ?= bibtex -terse
+LATEX     ?= pdflatex -file-line-error
+INKSCAPE  ?= inkscape
+
 .PHONY: all clean allclean
 
 all: paper presentation
@@ -24,30 +28,30 @@ allclean: clean
 paper: paper.pdf clean
 
 paper.pdf: paper.aux paper.bbl
-	pdflatex paper.tex
-	pdflatex paper.tex
+	$(LATEX) paper.tex
+	$(LATEX) paper.tex
 
 paper.bbl: paper.aux refs.bib
-	bibtex paper.aux
+	$(BIBTEX) -terse paper.aux
 
 paper.aux: paper.tex $(PAPER_INCLUDES)
-	pdflatex paper.tex
+	$(LATEX) paper.tex
 
 .PHONY: presentation
 
 presentation: presentation.pdf clean
 
 presentation.pdf: presentation.aux presentation.bbl
-	pdflatex presentation.tex
-	pdflatex presentation.tex
+	$(LATEX) presentation.tex
+	$(LATEX) presentation.tex
 
 presentation.bbl: presentation.aux refs.bib
-	bibtex presentation.aux
+	$(BIBTEX) presentation.aux
 
 presentation.aux: presentation.tex $(PRESENTATION_INCLUDES)
-	pdflatex presentation.tex
+	$(LATEX) presentation.tex
 
 # figures
 
 %.png: %.svg
-	inkscape -e $@ $<
+	$(INKSCAPE) -e $@ $<
