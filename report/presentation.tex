@@ -137,6 +137,21 @@
   \end{itemize}
 \end{frame}
 
+\begin{frame}[c]{Protocol}
+  \begin{center}
+    \includegraphics[width=0.8\textwidth]{proto.png}
+  \end{center}
+
+  \begin{itemize}
+    \item<1-> Structures passed through INET socket
+    \item<2-> Raw data immediately follows when necessary
+    \begin{itemize}
+      \item<2-> read(), write(), ...
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
 \section{Implementation}
 
 % Matt - End
