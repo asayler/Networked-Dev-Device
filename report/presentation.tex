@@ -86,7 +86,6 @@
 
 % Matt - Middle
 
-% Combine Architecture and System?
 \section{Architecture}
 
 \begin{frame}[c]{Very High Level}
@@ -344,33 +343,33 @@
 %---Current State Slide---%
 \begin{frame}{\bf Current State}
 
-\begin{itemize}
-\item Supports exporting a single character device from the server
-\item Supports importing a single character device on the client
-\item Supports open, close, read, and write calls
-\item Supports basic Linux udev operation for automatic node
-  creation on client
-\item Tested with various ``real'' and device files
-\end{itemize}
-
+  \begin{itemize}
+  \item<1-> Supports exporting a single character device from the server
+  \item<2-> Supports importing a single character device on the client
+  \item<3-> Supports open, close, read, and write calls
+  \item<4-> Supports basic Linux udev operation for automatic node
+    creation on client
+  \item<5-> Tested with various ``real'' and device files
+  \end{itemize}
+  
 \end{frame}
 
 %---ToDo Slide---%
 \begin{frame}{\bf ToDo}
 
 \begin{itemize}
-\item Multi-device, multi-server client-side import support
-\item Multi-device server-side export support
-\item Support for exclusive use and protection of exported devices
-\item Support for ioctl calls
-\item Support for providing and obtaining metadata for exported
+\item<1-> Multi-device, multi-server client-side import support
+\item<2-> Multi-device server-side export support
+\item<3-> Support for exclusive use and protection of exported devices
+\item<4-> Support for ioctl calls
+\item<5-> Support for providing and obtaining metadata for exported
   devices
-\item Support for ``advertisement'' of available exported devices
-\item Support for integrating imported devices into other kernel
+\item<6-> Support for ``advertisement'' of available exported devices
+\item<7-> Support for integrating imported devices into other kernel
   subsystems (human interface subsystem, audio subsystem, etc)
-\item Addition of ``NCD-admin'' utilities for managing and administering
+\item<8-> Addition of ``NCD-admin'' utilities for managing and administering
   NCD system
-\item Addition of graceful connect and disconnect handling in real-time
+\item<9-> Addition of graceful connect and disconnect handling in real-time
 \end{itemize}
 
 \end{frame}
@@ -381,12 +380,12 @@
 What are the benefits of using Networked Character Device?
 
 \begin{itemize}
-\item Divorces peripherals from the computers to which they are
+\item<1-> Divorces peripherals from the computers to which they are
   attached
-\item Allows simple creation of a ``Device Server''
-\item Extends the ``Everything Is A File'' -nix Philosophy
-\item Allows more efficient use of devices
-\item Allows devices to be networked in a generalized, uniform manner
+\item<2-> Allows simple creation of a ``Device Server''
+\item<3-> Extends the ``Everything Is A File'' -nix Philosophy
+\item<4-> Allows more efficient use of devices
+\item<5-> Allows devices to be networked in a generalized, uniform manner
 \end{itemize}
 
 \end{frame}
@@ -397,7 +396,7 @@ What are the benefits of using Networked Character Device?
 But there are difficulties making it work on a production scale...
 
 \begin{itemize}
-\item Does not work well when Character Device is not the exclusive
+\item<1-> Does not work well when Character Device is not the exclusive
   device interface
   \begin{itemize}
   \item Many modern day devices interface directly with other
@@ -406,8 +405,8 @@ But there are difficulties making it work on a production scale...
   \item Socket interfaces (netlink, etc) provide alternative to file
     system interfaces
   \end{itemize}
-\item Requires exported devices to be ``de-integrated'' from host system
-\item Requires QOS guarantees and high guilty network connection
+\item<2-> Requires exported devices to be ``de-integrated'' from host system
+\item<3-> Requires QOS guarantees and high guilty network connection
 \end{itemize}
 
 \end{frame}
@@ -418,35 +417,82 @@ But there are difficulties making it work on a production scale...
 What can we use NCDs for?
 
 \begin{itemize}
-\item Quick, cheap, and simple ad-hoc network KVM systems
-\item Remote, networked web-cams, scanners, printers, etc
-\item Basis of ``protocol''-over-Ethernet systems (USB-over-Ethernet,
+\item<1-> Quick, cheap, and simple ad-hoc network KVM systems
+\item<2-> Remote, networked web-cams, scanners, printers, etc
+\item<3-> Basis of ``protocol''-over-Ethernet systems (USB-over-Ethernet,
   SATA-over-Ethernet, Etc)
-\item Basis of redundant, ``cloud-like'' device pools
-\item Basis of peripheral cluster systems (GPU Clusters, RNG Clusters,
+\item<4-> Basis of redundant, ``cloud-like'' device pools
+\item<5-> Basis of peripheral cluster systems (GPU Clusters, RNG Clusters,
   Etc)
 \end{itemize}
 
 \end{frame}
 
+%---KVM Slide---%
+\begin{frame}{\bf KVM}
+
+Building a networked KVM system with NCDs:
+
+  \begin{center}
+    \includegraphics[height=0.6\paperheight,keepaspectratio]{kvm.png}
+  \end{center}
+
+\end{frame}
+
+%---Device Pool Slide---%
+\begin{frame}{\bf Random Number Generator Pool}
+
+Building a distributed RNG system with NCDs:
+
+  \begin{center}
+    \includegraphics[height=0.6\paperheight,keepaspectratio]{rng.png}
+  \end{center}
+
+\end{frame}
 
 \section{Future Work}
 %---Potential Uses Slide---%
 \begin{frame}{\bf Future Work}
 
 \begin{itemize}
-\item Add multi-device, multi-server support
-\item Add kernel sub-system handler layer (HID, etc)
-\item Add device protection and removal capabilities to server system
-\item Add advertisement protocol
-\item Consider removing networking code from client kernel module
+\item<1-> Add multi-device, multi-server support
+\item<2-> Add kernel sub-system handler layer (HID, etc)
+\item<3-> Add device protection and removal capabilities to server system
+\item<4-> Add advertisement protocol
+\item<5-> Consider removing networking code from client kernel module
 \end{itemize}
 
 \end{frame}
 
 \section{Conclusion}
 
+%---Conclusion Slide---%
+\begin{frame}{\bf Conclusion}
+
+Network Character Devices provide:
+
+\begin{itemize}
+\item<1-> A simple means to add network functionality to devices using
+  well understood file semantics and interfaces.
+\item<2-> The groundwork for cloud-like device pools and arrays
+\item<3-> The means to efficiently export devices from where they are not
+  need and import them where they can be used.
+\end{itemize}
+
+But to make them widely applicable:
+
+\begin{itemize}
+\item<4-> Device drivers must move back toward the sole use of the
+  device file based APIs
+\item<5-> Advertisement and management tools must be added
+\item<6-> The OS must not assume that it has exclusive access to any
+  device connected to the physical hardware on which it is running.
+\end{itemize}
+
+\end{frame}
+
 \section{Bibliography}
+
 %---Bibliography---%
 \begin{frame}{\bf Bibliography}
 
