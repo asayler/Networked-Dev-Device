@@ -314,10 +314,43 @@
 
 \subsection{Misc}
 
-\begin{frame}{\texttt{udev}}
+\begin{frame}[t,fragile]{\texttt{udev}}
+  \begin{lstlisting}[gobble=4,title=no way to set permissions within kernel,language=]
+    ACTION=="add", SUBSYSTEM=="netchar", MODE="0666"
+  \end{lstlisting}
+  \begin{lstlisting}[gobble=4,title=cannot retroactively apply input attributes,language=]
+    $ udevadm info -qall -n /dev/input/event8
+    P: /devices/virtual/input/input8/event8
+    N: input/event8
+    E: DEVNAME=/dev/input/event8
+    E: DEVPATH=/devices/virtual/input/input8/event8
+    E: ID_INPUT=1
+    E: ID_INPUT_KEY=1
+    E: SUBSYSTEM=input
+  \end{lstlisting}
 \end{frame}
 
-\begin{frame}{\texttt{ncadmin}}
+\begin{frame}[fragile]{\texttt{ncadmin}}
+  \begin{lstlisting}[gobble=4,language=]
+    usage: ncadmin command [args]
+
+      The following commands are supported:
+
+      add server port [name]
+        server - an ip address
+        port   - a port
+        name   - optional name relative to /dev. if no name is
+                 specified /dev/netchar/import# will be used
+
+      rm name
+        name   - the device relative to /dev to remove
+  \end{lstlisting}
+  \begin{itemize}
+    \item<2-> does nothing!
+    \item<3-> could use discovery service
+    \item<4-> requires individual \texttt{cdev}s
+    \item<5-> name is optional
+  \end{itemize}
 \end{frame}
 
 % Matt - End
