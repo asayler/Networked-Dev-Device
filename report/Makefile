@@ -18,7 +18,7 @@ all: paper presentation
 
 clean:
 	$(RM) *.aux *.bbl *.blg *.dvi *.log *.out *.nav *.snm *.toc *~
-	$(RM) inc/*.png
+	$(RM) inc/*.png *.vrb
 
 allclean: clean
 	$(RM) paper.pdf presentation.pdf
