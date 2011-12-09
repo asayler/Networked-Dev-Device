@@ -164,10 +164,12 @@
 \begin{frame}{\bf Current State}
 
 \begin{itemize}
-\item<1-> Supports exporting a single character device from the server
-\item<2-> Supports importing a single character device on the client
-\item<3-> Supports open, close, read, and write calls
-\item<4-> Supports basic Linux udev operation for automatic node creation on client
+\item Supports exporting a single character device from the server
+\item Supports importing a single character device on the client
+\item Supports open, close, read, and write calls
+\item Supports basic Linux udev operation for automatic node
+  creation on client
+\item Tested with various ``real'' and device files
 \end{itemize}
 
 \end{frame}
@@ -187,6 +189,7 @@
   subsystems (human interface subsystem, audio subsystem, etc)
 \item Addition of ``NCD-admin'' utilities for managing and administering
   NCD system
+\item Addition of graceful connect and disconnect handling in real-time
 \end{itemize}
 
 \end{frame}
@@ -194,14 +197,71 @@
 %---Advantages Slide---%
 \begin{frame}{\bf Advantages}
 
+What are the benefits of using Networked Character Device?
+
+\begin{itemize}
+\item Divorces peripherals from the computers to which they are
+  attached
+\item Allows simple creation of a ``Device Server''
+\item Extends the ``Everything Is A File'' -nix Philosophy
+\item Allows more efficient use of devices
+\item Allows devices to be networked in a generalized, uniform manner
+\end{itemize}
+
 \end{frame}
 
 %---Challenges Slide---%
 \begin{frame}{\bf Challenges}
 
+But there are difficulties making it work on a production scale...
+
+\begin{itemize}
+\item Does not work well when Character Device is not the exclusive
+  device interface
+  \begin{itemize}
+  \item Many modern day devices interface directly with other
+    in-kernel function, interfaces, and APIs
+  \item procfs and sysfs provide additional device interface points
+  \item Socket interfaces (netlink, etc) provide alternative to file
+    system interfaces
+  \end{itemize}
+\item Requires exported devices to be ``de-integrated'' from host system
+\item Requires QOS guarantees and high guilty network connection
+\end{itemize}
+
 \end{frame}
 
+%---Potential Uses Slide---%
+\begin{frame}{\bf Potential Uses}
+
+What can we use NCDs for?
+
+\begin{itemize}
+\item Quick, cheap, and simple ad-hoc network KVM systems
+\item Remote, networked web-cams, scanners, printers, etc
+\item Basis of ``protocol''-over-Ethernet systems (USB-over-Ethernet,
+  SATA-over-Ethernet, Etc)
+\item Basis of redundant, ``cloud-like'' device pools
+\item Basis of peripheral cluster systems (GPU Clusters, RNG Clusters,
+  Etc)
+\end{itemize}
+
+\end{frame}
+
+
 \section{Future Work}
+%---Potential Uses Slide---%
+\begin{frame}{\bf Future Work}
+
+\begin{itemize}
+\item Add multi-device, multi-server support
+\item Add kernel sub-system handler layer (HID, etc)
+\item Add device protection and removal capabilities to server system
+\item Add advertisement protocol
+\item Consider removing networking code from client kernel module
+\end{itemize}
+
+\end{frame}
 
 \section{Conclusion}
 
