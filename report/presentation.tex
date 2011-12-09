@@ -279,7 +279,7 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Socket Client}
+\begin{frame}{Socket Client}
   \begin{itemize}
     \item<1-> socket type: \texttt{AF\_INET}, \texttt{SOCK\_STREAM}, \texttt{IPPROTO\_TCP}
     \begin{itemize}
@@ -292,8 +292,34 @@
 
 \subsection{Server}
 
+\begin{frame}[fragile]{Server (\texttt{read()})}
+  \begin{lstlisting}[gobble=4]
+    struct fop_request req;
+    struct fop_reply   rep;
+    while (1) {
+      err = read(sd, &req, sizeof(req));
+      switch(req.call) {
+      case FOP_READ:
+        payload = realloc(payload, req.count);
+        rep.read = read(fd, payload, req.count);
+        if (rep.read < 0)
+          rep.read = -errno;
+        break;
+      }
+      err = write(sd, &rep, sizeof(rep));
+      if (rep.call == FOP_READ && rep.read > 0)
+        err = write(sd, payload, rep.read)
+    }
+  \end{lstlisting}
+\end{frame}
+
 \subsection{Misc}
 
+\begin{frame}{\texttt{udev}}
+\end{frame}
+
+\begin{frame}{\texttt{ncadmin}}
+\end{frame}
 
 % Matt - End
 
