@@ -117,7 +117,7 @@
   \end{center}
 
   \begin{itemize}
-    \item<1-> By default, devices are exposed under /dev/netchar
+    \item<1-> By default, devices are exposed under \texttt{/dev/netchar}
     \item<2-> In the future, we should be able to choose any name
   \end{itemize}
 \end{frame}
@@ -130,7 +130,7 @@
     \item<1-> Listen on a specified port
     \item<2-> Receive requests from client
     \begin{itemize}
-      \item<2-> open,close,read,write,...
+      \item<2-> \texttt{open()},\texttt{close()},\texttt{read()},\texttt{write()},...
     \end{itemize}
     \item<3-> Can actually export \textit{any} file
     \item<4-> Crashes ungracefully when the client disconnects
@@ -143,10 +143,10 @@
   \end{center}
 
   \begin{itemize}
-    \item<1-> Structures passed through INET socket
+    \item<1-> Structures passed through \texttt{INET} socket
     \item<2-> Raw data immediately follows when necessary
     \begin{itemize}
-      \item<2-> read(), write(), ...
+      \item<2-> \texttt{read()}, \texttt{write()}, ...
     \end{itemize}
   \end{itemize}
 \end{frame}
@@ -289,4 +289,4 @@ What can we use NCDs for?
 
 \end{document}
 
-% vim: set sw=2 ts=2 et : %
+% vim: set sw=2 ts=2 et spell : %
