@@ -32,3 +32,4 @@ report/inc/*.pdf
 *.nav
 *.snm
 *.toc
+*.vrb
