@@ -57,7 +57,9 @@
                                Landon Spear}
 \institute[CU-Boulder]{
   University of Colorado at Boulder \\
-  \texttt{\{first.last\}@colorado.edu}
+  \texttt{matthew.monaco@colorado.edu} \\
+  \texttt{andrew.sayler@colorado.edu} \\
+  \texttt{landon.spear@colorado.edu}
 }
 \date[Dec. 10, 2011]{Saturday, December 10\textsuperscript{th}, 2011}
 
@@ -79,16 +81,33 @@
 
 \section{Introduction}
 
+\begin{frame}{\bf NCD Goals}
+  \begin{itemize}
+    \item<1-> Export any character device (or file) from a server over IP
+    \begin{itemize}
+      \item<2-> Client has exclusive access
+      \item<3-> User-level advertisment, kernel-level functionality
+    \end{itemize}
+    \item<4-> Non-locality should be transparent to client's user level operations    
+    \begin{itemize}
+      \item<5-> Imported devices are accessed as local devices
+      \item<6-> All client device accesses are intercepted by kernel module and sent over network
+      \item<7-> Server has no access so write conflicts are not a problem
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
 \begin{frame}{\bf NCD Overview}
   \begin{itemize}
-    \item<1-> Export any (character) file from a server
-    \item<2-> Client: kernel module (Linux 2.6.x+)
-    \item<3-> Server: userspace daemon
-    \item<4-> Project Status:
+    \item<1-> Stuff
+    \item<2-> Motivation: transparent remote device usage
+    \item<3-> Client: kernel module (Linux 2.6.x+)
+    \item<4-> Server: userspace daemon
+    \item<5-> Current Project Status:
     \begin{itemize}
-      \item<5-> successful implementation
-      \item<5-> rough around the edges
-      \item<5-> very clear focus for future work
+      \item<6-> successful implementation
+      \item<6-> rough around the edges
+      \item<6-> very clear focus for future work
     \end{itemize}
   \end{itemize}
 \end{frame}
@@ -98,7 +117,7 @@
     \item nfs
     \item nbd
     \item CUSE
-    \item various usb networking layers
+    \item USB/IP Project
   \end{itemize}
 \end{frame}
 
