@@ -88,10 +88,12 @@
       \item<2-> Client has exclusive access
       \item<3-> User-level advertisment, kernel-level functionality
     \end{itemize}
-    \item<4-> Non-locality should be transparent to client's user level operations    
+    \item<4-> Non-locality should be transparent to client's user
+      level operations    
     \begin{itemize}
       \item<5-> Imported devices are accessed as local devices
-      \item<6-> All client device accesses are intercepted by kernel module and sent over network
+      \item<6-> All client device accesses are intercepted by kernel
+        module and sent over network
       \item<7-> Server has no access so write conflicts are not a problem
     \end{itemize}
   \end{itemize}
@@ -99,7 +101,8 @@
 
 \begin{frame}{\bf NCD Overview}
   \begin{itemize}
-    \item<1-> Motivation: providing transparent access to remote devices opens up a new paradigm of storage and device usage
+    \item<1-> Motivation: providing transparent access to remote
+      devices opens up a new paradigm of storage and device usage
     \begin{itemize}
       \item<2-> Physical locality only needed for lower latency
     \end{itemize}
@@ -120,22 +123,19 @@
 
 \begin{frame}{Related Work}
   \begin{itemize}
-    \item NFS
+    \item NFS \cite{nfs-source}
     \begin{itemize}
       \item Access to remote file system, but no devices
       \item Safe access
-      \item http://nfs.sourceforge.net/
     \end{itemize}
-    \item NBD
+    \item NBD \cite{nbd-source}
     \begin{itemize}
       \item Network Block Device- Introduced in Linux kernel 2.1.101
       \item Works with any file system but no exclusive access 
-      \item http://nbd.sourceforge.net/
     \end{itemize}
-    \item CUSE
+    \item CUSE \cite{cuse-article}
     \begin{itemize}
-      \item Character Device in User Space (extension of FUSE)- Linux kernel 2.6.31
-      \item http://lwn.net/Articles/308445/
+      \item Character Device in User Space (extension of FUSE)
     \end{itemize}
     \item USB/IP Project
     \begin{itemize}

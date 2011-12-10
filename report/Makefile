@@ -18,8 +18,8 @@ INKSCAPE  ?= inkscape
 all: paper presentation
 
 clean:
-	$(RM) *.aux *.bbl *.blg *.dvi *.log *.out *.nav *.snm *.toc *~
-	$(RM) inc/*.png *.vrb
+	$(RM) *.aux *.bbl *.blg *.dvi *.log *.out *.nav *.snm *.toc *.vrb *~
+	$(RM) inc/*.png
 
 allclean: clean
 	$(RM) paper.pdf presentation.pdf
