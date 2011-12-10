@@ -15,7 +15,7 @@ INKSCAPE  ?= inkscape
 
 .PHONY: all clean allclean
 
-all: paper presentation
+all: paper presentation clean
 
 clean:
 	$(RM) *.aux *.bbl *.blg *.dvi *.log *.out *.nav *.snm *.toc *.vrb *~
