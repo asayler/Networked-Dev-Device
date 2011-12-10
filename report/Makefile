@@ -6,7 +6,7 @@ PAPER_INCLUDES        = arch-03.svg proto.svg
 
 INC_PATH = inc/
 PRESENTATION_INCLUDES := $(addprefix $(INC_PATH), $(PRESENTATION_INCLUDES:%.svg=%.png))
-PAPER_INCLUDES        := $(addprefix $(INC_PATH), $(PAPER_INCLUDES:%.svg=%.png))
+PAPER_INCLUDES        := $(addprefix $(INC_PATH), $(PAPER_INCLUDES:%.svg=%-g.png))
 export TEXINPUTS := .:./$(INC_PATH)/:$(TEXINPUTS)
 
 BIBTEX    ?= bibtex -terse
