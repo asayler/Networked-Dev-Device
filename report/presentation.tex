@@ -120,10 +120,29 @@
 
 \begin{frame}{Related Work}
   \begin{itemize}
-    \item nfs
-    \item nbd
+    \item NFS
+    \begin{itemize}
+      \item Access to remote file system, but no devices
+      \item Safe access
+      \item http://nfs.sourceforge.net/
+    \end{itemize}
+    \item NBD
+    \begin{itemize}
+      \item Network Block Device- Introduced in Linux kernel 2.1.101
+      \item Works with any file system but no exclusive access 
+      \item http://nbd.sourceforge.net/
+    \end{itemize}
     \item CUSE
+    \begin{itemize}
+      \item Character Device in User Space (extension of FUSE)- Linux kernel 2.6.31
+      \item http://lwn.net/Articles/308445/
+    \end{itemize}
     \item USB/IP Project
+    \begin{itemize}
+      \item USB device sharing over IP
+      \item http://usbip.sourceforge.net/
+    \end{itemize}
+    
   \end{itemize}
 \end{frame}
 
