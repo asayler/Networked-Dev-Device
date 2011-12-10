@@ -58,7 +58,12 @@
 \maketitle
 
 \begin{abstract}
-Lorem ipsum
+While there are various projects which provide a network abstraction layer for
+specific high-level subsystems in the Linux kernel, there aren't any low-level
+general purpose solutions. Network character devices (NCD) is a system for
+exporting character device drivers of a fast, local network. However NCD works
+to some extent with regular files, block devices, sockets, and pipes; it is also
+suitably responsive over Internet connections for many applications.
 \end{abstract}
 
 % Landon Sections
@@ -160,3 +165,5 @@ of some of these expanded features.
 \bibliography{refs}
 
 \end{document}
+
+% vim: set ts=2 sts=2 sw=2 et spell tw=72 : %
