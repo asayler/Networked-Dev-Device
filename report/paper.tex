@@ -80,16 +80,83 @@ We are unique.
 
 % Matt Sections
 
-% Combine Architecture and System?
 \section{Architecture}
 \label{sec:architecture}
 
-\lstinputlisting[float=*,
-  caption={Listing Code Sample},
-  label=lst:codeSample.c]{codesample.c}
+\begin{figure}[h]
+  \begin{center}
+    \includegraphics[width=0.5\textwidth]{arch-03.png}
+  \end{center}
+  \caption{The basic client-server model of NCD.}
+  \label{fig:architecture}
+\end{figure}
 
-\section{System}
-\label{sec:system}
+On a very high level, NCD uses a basic client server model. The client
+issues a request to the server, which in turn issues a reply. The
+server never initiates any communication on its own.
+
+\subsection{Client}
+
+The client is currently implemented entirely within an out-of-tree kernel
+module. This is arguably not the most robust, nor secure, solution. See
+section \ref{sec:futurework} for details on splitting out some functionality
+into a user-space helper.
+
+Devices which have been imported on the client reside within the
+devtmpfs filesystem. This is almost always mounted on \texttt{/dev}. By
+default an imported device will take on the name
+\texttt{/dev/netchar/importN}, where \texttt{N} is the next available
+number. In the future (and without much effort), imported devices will
+be able to take on their original name from the server. For example, an
+input device can be located at \texttt{/dev/input/eventN}. Furthermore,
+the user or administrator may choose any mapping (s)he see fits.
+
+\subsection{Server}
+
+The server is, as mentioned, a typical user-space daemon. It
+currently only services a single file. Whether or not the server should
+handle multiple exports is still up for evaluation.
+
+The server listens on a port specified on the command line. There is no
+default. When a request is received from the client, it will correspond
+to one of the standard VFS file operations. Currently, \texttt{open()},
+\texttt{close()}
+\footnote{The counterpart for \texttt{close()} is actually referred to
+as \texttt{release()} within the kernel.}
+, \texttt{read()}, and \texttt{write()} are supported.
+
+After receiving a request, the server then performs the requested
+operation locally and returns the result to the client in a reply
+message. For example, if the client sends an \texttt{open()} request,
+the server will open and hold a file descriptor on the client's behalf.
+
+This straightforward architecture will actually support any file type
+(with certain restrictions for each type). Character devices, regular
+files, sockets, and pipes should work fully (when all file operations
+are implemented). Block devices and even directories will work to some
+extent.
+
+\subsection{Protocol}
+
+\begin{figure}[h]
+  \begin{center}
+    \includegraphics[width=0.5\textwidth]{proto.png}
+  \end{center}
+  \caption{NCD operates over a simple request reply protocol. Bulk data
+  immediately follows formal messages, as required.}
+  \label{fig:protocol}
+\end{figure}
+
+The protocol is implemented as a simple request-reply system over
+\texttt{INET} sockets. All request types are encapsulated within a
+single request structure (see section \ref{sec:implementation}).
+Similarly, there is only a single reply structure to account for all
+reply types.
+
+Bulk data is sent in the raw immediately following the corresponding
+request/reply. In the case of a \texttt{read()}, the targeted data
+immediately follows the reply. In the case of a \texttt{write()}, the
+targeted data immediately follows the initial request.
 
 \section{Implementation}
 \label{sec:implementation}
