@@ -85,14 +85,16 @@
   \begin{itemize}
     \item<1-> Export any character device (or file) from a server over IP
     \begin{itemize}
-      \item<2-> Client has exclusive access
-      \item<3-> User-level advertisment, kernel-level functionality
+      \item<2-> Mouse, Webcam, keyboard, USB flash drive, Xbox Kinect, monitor, external HD, etc...
+      \item<3-> Client has exclusive access
+      \item<4-> User-level advertisment, kernel-level functionality
     \end{itemize}
-    \item<4-> Non-locality should be transparent to client's user level operations    
+    \item<5-> Non-locality should be transparent to client's user level operations    
     \begin{itemize}
-      \item<5-> Imported devices are accessed as local devices
-      \item<6-> All client device accesses are intercepted by kernel module and sent over network
-      \item<7-> Server has no access so write conflicts are not a problem
+      \item<6-> Imported devices are accessed as local devices
+      \item<7-> All client device accesses are intercepted by kernel module and sent over network
+      \item<8-> Server user-space daemon accesses device to emulate client
+      \item<9-> Server should have no other access so write conflicts are not a problem
     \end{itemize}
   \end{itemize}
 \end{frame}
@@ -112,7 +114,8 @@
           \item<7-> Successful implementation
           \item<8-> Rough around the edges
           \item<9-> More development required for certain devices
-          \item<10-> Very clear focus for future work
+          \item<10-> Groundwork laid for exporting all devices
+          \item<11-> Very clear focus for future work
         \end{itemize}
       \end{itemize}
   \end{itemize}
@@ -135,6 +138,7 @@
     \item CUSE
     \begin{itemize}
       \item Character Device in User Space (extension of FUSE)- Linux kernel 2.6.31
+      \item Used for OSS proxy for remote sound systems
       \item http://lwn.net/Articles/308445/
     \end{itemize}
     \item USB/IP Project
