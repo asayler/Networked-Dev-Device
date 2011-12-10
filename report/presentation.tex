@@ -9,6 +9,7 @@
 \setbeamercovered{transparent=25}
 \setbeamertemplate{blocks}[rounded][shadow=false]
 \setbeamertemplate{navigation symbols}{}
+\setcounter{tocdepth}{1}
 
 \usepackage{graphicx}
 \usepackage{url}
@@ -99,6 +100,20 @@
   \end{itemize}
 \end{frame}
 
+%---Full State Slide---%
+\begin{frame}[c]{Full System}
+  \begin{center}
+    \includegraphics[height=0.75\paperheight,keepaspectratio]{system-full.png}
+  \end{center}
+\end{frame}
+
+%---Current State Image Slide---%
+\begin{frame}[c]{Current State}
+  \begin{center}
+    \includegraphics[height=0.75\paperheight,keepaspectratio]{system-working.png}
+  \end{center}
+\end{frame}
+
 \begin{frame}{\bf NCD Overview}
   \begin{itemize}
     \item<1-> Motivation: providing transparent access to remote
@@ -139,7 +154,7 @@
     \item Character Device in User Space (extension of FUSE)
     \item Used for OSS proxy for remote sound systems
     \end{itemize}
-  \item USB/IP Project
+  \item USB/IP Project \cite{usbip-source}
     \begin{itemize}
     \item USB device sharing over IP
     \end{itemize}
@@ -397,6 +412,7 @@
     E: ID_INPUT_KEY=1
     E: SUBSYSTEM=input
   \end{lstlisting}
+%$
 \end{frame}
 
 \begin{frame}[fragile]{\texttt{ncadmin}}
@@ -428,7 +444,6 @@
 
 \section{Results and Evaluation}
 %---Full State Slide---%
-
 \begin{frame}[c]{Full System}
   \begin{center}
     \includegraphics[height=0.75\paperheight,keepaspectratio]{system-full.png}
