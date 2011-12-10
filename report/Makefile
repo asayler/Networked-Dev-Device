@@ -12,10 +12,11 @@ export TEXINPUTS := .:./$(INC_PATH)/:$(TEXINPUTS)
 BIBTEX    ?= bibtex -terse
 LATEX     ?= pdflatex -file-line-error
 INKSCAPE  ?= inkscape
+CONVERT   ?= convert
 
 .PHONY: all clean allclean
 
-all: paper presentation clean
+all: paper.pdf presentation.pdf clean
 
 clean:
 	$(RM) *.aux *.bbl *.blg *.dvi *.log *.out *.nav *.snm *.toc *.vrb *~
@@ -26,7 +27,7 @@ allclean: clean
 
 .PHONY: paper
 
-paper: paper.pdf
+paper: paper.pdf clean
 
 paper.pdf: paper.aux paper.bbl
 	$(LATEX) paper.tex
@@ -40,7 +41,7 @@ paper.aux: paper.tex $(PAPER_INCLUDES)
 
 .PHONY: presentation
 
-presentation: presentation.pdf
+presentation: presentation.pdf clean
 
 presentation.pdf: presentation.aux presentation.bbl
 	$(LATEX) presentation.tex
@@ -56,3 +57,6 @@ presentation.aux: presentation.tex $(PRESENTATION_INCLUDES)
 
 %.png: %.svg
 	$(INKSCAPE) -e $@ $<
+
+%-g.png: %.png
+	$(CONVERT) -colorspace gray $< $@
