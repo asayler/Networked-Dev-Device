@@ -26,7 +26,7 @@ allclean: clean
 
 .PHONY: paper
 
-paper: paper.pdf clean
+paper: paper.pdf
 
 paper.pdf: paper.aux paper.bbl
 	$(LATEX) paper.tex
@@ -40,7 +40,7 @@ paper.aux: paper.tex $(PAPER_INCLUDES)
 
 .PHONY: presentation
 
-presentation: presentation.pdf clean
+presentation: presentation.pdf
 
 presentation.pdf: presentation.aux presentation.bbl
 	$(LATEX) presentation.tex
