@@ -161,6 +161,32 @@ targeted data immediately follows the initial request.
 
 \subsection{Protocol}
 
+\lstinputlisting[
+  caption={The structures which make up the NCD protocol.},
+  label=lst:protocol
+]{protocol.c}
+
+The protocol for NCD operates over TCP sockets. Despite the potential
+for large amounts of streaming data over the internet --- data which may
+be acceptable to drop --- some messages are unacceptable to lose. Any
+request or reply should be guaranteed. The data following a
+\texttt{read()} or \texttt{write()} (figure \ref{fig:protocol}), for
+example, may not be as important. Therefore, in the future it may be
+beneficial to implement the core protocol over TCP and bulk data over
+UDP (section \ref{sec:futurework}).
+
+Because there is only one type of packet for a request, and another for
+a reply, (listing \ref{lst:protocol}) there is a small amount of wasted
+space on some file operations. We have done our best to reduce this
+overhead as much as possible, making use of a cascade of nested unions
+and structs.
+
+The request struct is suitable to handle all of the function arguments
+for all of the operations we support. The reply struct is much simpler
+as functions only have a single return value. While some file operations
+have output parameters and some userspace system calls do as well, there
+aren't any cases where these need to be passed over the network.
+
 \subsection{Client}
 
 \subsection{Misc}
