@@ -238,6 +238,31 @@ kernel (permissions for example).
 \subsubsection{udev}
 \label{subsec:udev}
 
+\lstinputlisting[
+  lastline=1,
+  caption={A simple \texttt{udev} rule for managing NCD device
+  permissions.},
+  label=lst:udevrule
+]{udev.txt}
+
+A lot of magic is performed on character devices in userspace by
+\texttt{udev}. Currently we are using \texttt{udev} to manage the
+permissions of imported devices (listing \ref{lst:udevrule}).
+
+\lstinputlisting[
+  firstline=3,
+  caption={\texttt{udev} attributes required by userspace programs such
+  as the \texttt{Xserver} for knowing a device is a keyboard.},
+  label=lst:udevattr
+]{udev.txt}
+
+For more functionality, imported character devices must have certain
+attributes such as those for the keyboard in listing \ref{lst:udevattr}.
+Unfortunately setting them retroactively does not convince all programs
+of a particular devices type. Therefore interfacing with specific kernel
+subsystems such as \texttt{input} and \texttt{usb} will be required in
+the future for enhanced functionality.
+
 \subsubsection{ncadmin}
 
 % Andy Sections
