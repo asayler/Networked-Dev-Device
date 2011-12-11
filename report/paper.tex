@@ -7,7 +7,7 @@
 
 \documentclass[11pt,twocolumn]{article}
 
-\usepackage[text={6in, 9in}, centering]{geometry}
+\usepackage[text={6.5in, 9in}, centering]{geometry}
 \usepackage{graphicx}
 \usepackage{url}
 \usepackage{listings}
@@ -30,8 +30,7 @@
   breaklines=true,
   breakatwhitespace=false,
   frame=none,
-  frameround=tttt,
-  float
+  frameround=tttt
 }
 
 \newenvironment{packed_enum}{
@@ -81,6 +80,14 @@ interface.
 
 We did some stuff, we used some references \cite{ldd3}.
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\textwidth]{system-full-g.png}
+  \caption{The NCD system. See Figure \ref{fig:system-working}
+    for currently implemented system state.}
+  \label{fig:system-full}
+\end{figure}
+
 \section{Related Work}
 \label{sec:relatedwork}
 
@@ -92,9 +99,8 @@ We are unique.
 \label{sec:architecture}
 
 \begin{figure}[h]
-  \begin{center}
-    \includegraphics[width=0.5\textwidth]{arch-03-g.png}
-  \end{center}
+  \centering
+  \includegraphics[width=0.5\textwidth]{arch-03-g.png}
   \caption{The basic client-server model of NCD.}
   \label{fig:architecture}
 \end{figure}
@@ -116,12 +122,12 @@ default an imported device will take on the name
 \texttt{/dev/netchar/importN}, where \texttt{N} is the next available
 number. In the future (and without much effort), imported devices will
 be able to take on their original name from the server. For example, an
-input device can be located at \texttt{/dev/input/eventN}. Furthermore,
+input device should be located at \texttt{/dev/input/eventN}. Furthermore,
 the user or administrator may choose any mapping (s)he see fits.
 
 \subsection{Server}
 
-The server is, as mentioned, a typical user-space daemon. It
+The server is a typical user-space daemon. It
 currently only services a single file. Whether or not the server should
 handle multiple exports is still up for evaluation.
 
@@ -147,11 +153,10 @@ extent.
 \subsection{Protocol}
 
 \begin{figure}[h]
-  \begin{center}
-    \includegraphics[width=0.5\textwidth]{proto-g.png}
-  \end{center}
+  \centering
+  \includegraphics[width=0.5\textwidth]{proto-g.png}
   \caption{NCD operates over a simple request reply protocol. Bulk data
-  immediately follows formal messages, as required.}
+    immediately follows formal messages, as required.}
   \label{fig:protocol}
 \end{figure}
 
@@ -214,7 +219,7 @@ errors and cleanup all memory in the \texttt{module\_init} and
 \texttt{module\_exit} routines.
 
 Some of the basic features of the NCD kernel module are listed in
-listing \ref{lst:client}. Firstly, NCD dynamically requests a major and
+listing \ref{lst:client}. NCD dynamically requests a major and
 minor number from the running kernel \footnote{Statically assigned
 major/minor numbers are no longer required and are discouraged for new
 modules.}. These numbers are stored in a \texttt{struct dev\_t}. Once
@@ -232,7 +237,7 @@ file operations which we support for our character devices \footnote{See
 
 Most importantly, \texttt{struct cdev} ties together the major/minor
 number with the given set of file operations. With this it is possible
-for a kernel module to register for many major/minor numbers (typically
+for a kernel module to register many major/minor numbers (typically
 a contiguous range), while having fine-grained control over which
 subsets are handled by which distinct groups of file operations. This
 will be important in the future as specific subsystems are handled
@@ -281,7 +286,8 @@ new features.
 ]{udev.txt}
 
 A lot of magic is performed on character devices in userspace by
-\texttt{udev}. Currently we are using \texttt{udev} to manage the
+the Linux \texttt{udev} system.
+Currently we are using \texttt{udev} to manage the
 permissions of imported devices (listing \ref{lst:udevrule}).
 
 \lstinputlisting[
@@ -318,31 +324,39 @@ location to the corresponding device on the server.
 \section{Results and Evaluation}
 \label{sec:results}
 
-The Network Character Device system is still a work in
-progress. We will need to Expand the system beyond it's current state
+The Network Character Devices system is still a work in
+progress. We will need to expand the system beyond it's current state
 before the NCD concept is ready for production-level use.
 
-Non the less, we have gained many insights into the advantages such a
+None the less, we have gained many insights into the advantages such a
 system might provide. We have also encountered the difficulties
 implementing such a system into an existing OS like Linux entails.
 
 \subsection{Current Status}
 \label{sec:currentstatus}
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\textwidth]{system-working-g.png}
+  \caption{The NCD system with currently functioning portions
+    highlighted.}
+  \label{fig:system-working}
+\end{figure}
+
 As of this writing, we have completed a partial implementation of
-the Network Character Device system. Current functionality includes:
+the Network Character Devices system. Current functionality includes:
 
 \begin{packed_item}
 \item Support for exporting a single character device from the server
 \item Support for importing a single character device on the client
-\item Client-side kernel-space Linux module implementation
-\item Server-side user-space background process implementation
-\item Support for open, close, read, and write calls
-\item Basic Linux udev support for automatic node creation on client
+\item Support for \texttt{open()}, \texttt{close()}, \texttt{read()},
+  and \texttt{write()} calls
+\item Basic Linux \texttt{udev} support for automatic node
+  provisioning on the client
 \end{packed_item}
 
 This set of core functionality provides a working proof-of-concept
-Network Character Device system. This system fully supports the
+Network Character Devices system. This system fully supports the
 export of a single character device from server to client over the
 network and demonstrates the basic use and utility of such a system.
 
@@ -362,8 +376,8 @@ implementation:
 \item Support for ``advertisement'' of available exported devices
 \item Support for integrating imported devices into other kernel
   subsystems (human interface subsystem, audio subsystem, etc)
-\item Addition of ``NCD-admin'' utilities for managing and administering
-  NCD system
+\item Addition of UDP and TCP support with user selection
+\item Addition of graceful connect and disconnect handling in real-time
 \end{packed_item}
 
 Section \ref{sec:futurework} provides some insight into the addition
