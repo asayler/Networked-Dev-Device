@@ -486,7 +486,7 @@ currently are:
 The current NCD system only support a single device per server and per
 client. To be truly useful and to enable the construction of the
 kinds of system we envision NCD being used for (Section
-\ref{potentialuses}), we must at least
+\ref{sec:potentialuses}), we must at least
 expand the client-side
 system to support importing an arbitrary number of devices from one
 or more servers. Ideally, servers should also be capable of serving
@@ -535,8 +535,24 @@ a more minimal client kernel module only when necessary.
 \section{Potential Uses}
 \label{sec:potentialuses}
 
+The shift from the traditional concept of locally available devices to a
+broader concept of generalized network accessible devices has the
+potential to allow the creation of a variety of novel
+applications. Here we explore a few of the possible applications of an
+NCD system.
+
 \subsection{Networked KVM System}
 \label{sec:networkedkvm}
+
+KVM (Keyboard-Video-Mouse) systems are commonly used in data centers
+and other areas where a user wishes to use a single keyboard, video,
+and mouse, to control multiple machines. KVM systems range from simple KVM
+switches that allow the user to select which local machine is
+physically connected to his or her i/o devices to
+networked KVM systems that allow the user to use a
+local KVM setup to interface with a computer located elsewhere on the
+network. The latter class of networked KVM devices traditionally require
+expensive propriety hardware.
 
 \begin{figure}[h]
   \centering
@@ -545,8 +561,40 @@ a more minimal client kernel module only when necessary.
   \label{fig:kvm}
 \end{figure}
 
+As Figure \ref{fig:kvm} shows, we can use Networked Character Devices
+to quickly and easily build a networked KVM system in software,
+forgoing the need for expensive specialized hardware. The user simply
+connects a spare mouse and keyboard to an NCD server, tells the NCD
+system to export these devices, and then imports them on the client
+machine (s)he wishes to control. To the client, the devices appear as
+a locally connected keyboard and mouse, and the user may issue input to
+the client machine via the keyboard and mouse connected to the
+server.
+
+As we mentioned previously, an NCD based KVM system would require the
+appropriate import interface to the Linux HID subsystem, but once this is
+in place, building a networked KVM atop the NCD system would be a
+rather trivial matter.
+
 \subsection{Distributed RNG System}
 \label{sec:distributedrng}
+
+Another example of the novel systems that can be built use Network
+Charter Devices is a distributed random number generator. Linux has a
+fairly robust random number generator built into it and accessible as
+a Character Device at \texttt{/dev/random}. This RNG relies on the
+local entropy pool (generally filled by human interaction, interrupt
+timings, and other high entropy events) to generate random
+numbers. This, the speed at which random numbers can be generated is
+limited on any single system to the locally available
+entropy. This can severely hinder the
+performance of systems that require random numbers\footnote{Linux also
+provides the \texttt{/dev/urandom} RNG which is a pseudorandom number
+generator seeded off teh true
+\texttt{/dev/random}. \texttt{/dev/urandom} trades ``randomness'' in
+favor of speed. It is thus handy when one just needs to quickly
+generate pseudorandom numbers, but is not appropriate for cryptography or
+other secure random system.}.
 
 \begin{figure}[h]
   \centering
@@ -555,8 +603,39 @@ a more minimal client kernel module only when necessary.
   \label{fig:rng}
 \end{figure}
 
+We can imagine a system that uses Network Character Devices to overcome
+the normal limitations related to relying on locally available entropy. This
+system would be capable of generating cryptographically secure
+randomness while also delivering high performance.
+
+Figure \ref{fig:rng} shows how such a system might work. In this
+distributed RNG system, multiple hosts act as NCD servers by exporting
+their local \texttt{/dev/random} character devices. These devices are
+all imported by a single client running some from on RNG aggregator
+that combines the relatively slow output form the local RNGs into a
+single high speed RNG output. We can effectively pool the entropy
+available on numerous hosts to drive a single high performance RNG
+system.
+
+As in the KVM system, using Networked Character Devices makes the
+implementation of such a system relatively straight forward.
+
 \section{Conclusion}
 \label{sec:conclusion}
+
+Network Character Devices provide an extension of the standard device
+driver file interface across the network. They allow for device
+capabilities to be exported from where they are not needed and imported
+where they are. By separating device usage from the device physical
+location and host, the NCD system provides a generalized, transparent,
+means for abstracting device functionality across a network.
+
+As the potential uses demonstrate, the power of
+the NCD concept is in the ability to achieve complex solutions without
+needing to resort to specialized device networking protocols and other
+complex ad-hoc systems. We hope to continue the development of the NCD
+concept and to utilize it to build powerful, but easily implementable,
+device-dependent systems.
 
 \nocite{*}
 \bibliography{refs}
