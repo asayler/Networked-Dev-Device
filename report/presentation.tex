@@ -266,7 +266,7 @@
 \end{frame}
 
 \begin{frame}{Character Device Driver}
-  \lstinputlisting[]{cdev-driver.c}
+  \lstinputlisting[lastline=8]{cdev-driver.c}
 
   \begin{itemize}
     \item<1-> \texttt{dev\_t}: major/minor number
@@ -278,7 +278,7 @@
 \end{frame}
 
 \begin{frame}{Filesystem Handler}
-  \lstinputlisting[]{fop-driver.c}
+  \lstinputlisting[linerange={3-4,10-18}]{cdev-driver.c}
 
   \begin{itemize}
     \item<1-> required when registering character device
