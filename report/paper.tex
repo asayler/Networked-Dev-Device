@@ -189,9 +189,54 @@ aren't any cases where these need to be passed over the network.
 
 \subsection{Client}
 
+\lstinputlisting[
+  caption={The NCD kernel module has a number of roles.},
+  label=lst:client
+]{cdev-driver.c}
+
+The client resides entirely within a kernel module \footnote{The merits
+of including everything within a kernel module are discussed in section
+\ref{sec:currentstatus}.}. A typical userspace program can be sloppy
+with cleanup because all memory is freed on termination. In contrast, a
+kernel module must be very careful because its lifetime is shorter than
+the kernel itself. Therefore it is very import to correctly handle
+errors and cleanup all memory in the \texttt{module\_init} and
+\texttt{module\_exit} routines.
+
+Some of the basic features of the NCD kernel module are listed in
+listing \ref{lst:client}. Firstly, NCD dynamically requests a major and
+minor number from the running kernel \footnote{Statically assigned
+major/minor numbers are no longer required and are discouraged for new
+modules.}. These numbers are stored in a \texttt{struct dev\_t}. Once
+these numbers are assigned, the kernel will pass all file operations on
+character devices with the NCD major/minor number to the NCD module.
+
+The \texttt{struct class} is somewhat synonymous with a kernel
+subsystem. Because the major/minor number is dynamic, it is with this
+class that userspace is able to persistently refer to NCD character
+device nodes (see \ref{subsec:udev}).
+
+\texttt{Struct file\_operations} is used to define the handlers for all
+file operations which we support for our character devices \footnote{See
+\texttt{linux/fs.h} for a complete list of file operations.}.
+
+Most importantly, \texttt{struct cdev} ties together the major/minor
+number with the given set of file operations. With this it is possible
+for a kernel module to register for many major/minor numbers (typically
+a contiguous range), while having fine-grained control over which
+subsets are handled by which distinct groups of file operations. This
+will be important in the future as specific subsystems are handled
+differently by NCD to increase functionality.
+
+Finally, \texttt{struct device} is used to actually create a character
+device node under \texttt{/dev} in userspace. Unfortunately, not
+everything we might want to do to this device can be accomplished in the
+kernel (permissions for example).
+
 \subsection{Misc}
 
 \subsubsection{udev}
+\label{subsec:udev}
 
 \subsubsection{ncadmin}
 
