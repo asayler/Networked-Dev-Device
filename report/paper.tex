@@ -237,7 +237,7 @@ file operations which we support for our character devices \footnote{See
 
 Most importantly, \texttt{struct cdev} ties together the major/minor
 number with the given set of file operations. With this it is possible
-for a kernel module to register many major/minor numbers (typically
+for a kernel module to register for many major/minor numbers (typically
 a contiguous range), while having fine-grained control over which
 subsets are handled by which distinct groups of file operations. This
 will be important in the future as specific subsystems are handled
