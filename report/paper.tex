@@ -233,6 +233,31 @@ device node under \texttt{/dev} in userspace. Unfortunately, not
 everything we might want to do to this device can be accomplished in the
 kernel (permissions for example).
 
+\subsection{Server}
+
+\lstinputlisting[
+  caption={A code snippet from the server illustrating a \texttt{read()}
+  file operation},
+  label=lst:server
+]{server.c}
+
+The server will spend most of its time sitting on a blocked read of the
+socket file descriptor. Once the client sends a request, it will be
+available to the server in the appropriate structure.
+
+In the snippet given in listing \ref{lst:server}, a \texttt{read()} file
+operation is handled. A buffer must be allocated with a size
+indicated by the original request. Next, the server can perform the
+corresponding operation and send a reply message to the client. Finally,
+the bulk data is sent to the client. All buffering is performed by the
+underlying \texttt{SOCK\_STREAM} and TCP protocols.
+
+The server itself is, and will always be, simple compared to the
+in-kernel module. As NCD grows, the server's functionality should remain
+fairly static. Section \ref{sec:futurework} discusses some enhancements
+which will make the server more stable, however it doesn't require many
+new features.
+
 \subsection{Misc}
 
 \subsubsection{udev}
