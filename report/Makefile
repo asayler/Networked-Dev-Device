@@ -3,7 +3,7 @@ PRESENTATION_INCLUDES = arch-01.svg arch-02.svg arch-03.svg proto.svg \
 			system-full.svg system-working.svg kvm.svg rng.svg
 
 PAPER_INCLUDES        = arch-03.svg proto.svg system-full.svg system-working.svg \
-			
+			kvm.svg rng.svg
 
 INCLUDE_DIR = inc
 

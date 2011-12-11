@@ -117,7 +117,7 @@ section \ref{sec:futurework} for details on splitting out some functionality
 into a user-space helper.
 
 Devices which have been imported on the client reside within the
-devtmpfs filesystem. This is almost always mounted on \texttt{/dev}. By
+devtmpfs file system. This is almost always mounted on \texttt{/dev}. By
 default an imported device will take on the name
 \texttt{/dev/netchar/importN}, where \texttt{N} is the next available
 number. In the future (and without much effort), imported devices will
@@ -182,7 +182,7 @@ targeted data immediately follows the initial request.
 ]{protocol.c}
 
 The protocol for NCD operates over TCP sockets. Despite the potential
-for large amounts of streaming data over the internet --- data which may
+for large amounts of streaming data over the Internet --- data which may
 be acceptable to drop --- some messages are unacceptable to lose. Any
 request or reply should be guaranteed. The data following a
 \texttt{read()} or \texttt{write()} (figure \ref{fig:protocol}), for
@@ -386,13 +386,66 @@ of some of these expanded features.
 \subsection{Advantages}
 \label{sec:advantages}
 
+The primary advantages of using Networked Charterer Devices are:
 
+\begin{packed_item}
+\item Divorces peripherals from the computers to which they are
+  attached
+\item Allows simple creation of a ``Device Server''
+\item Extends the ``Everything Is A File'' -nix philosophy
+\item Allows more efficient use of devices
+\item Allows devices to be networked in a generalized, uniform manner
+\end{packed_item}
+
+By allowing the interface for any device to be exported over the
+network, the NCD system effectively removes the traditional restriction
+that devices are only available on the hosts to which they are
+physically connected. Removing this restriction has far reaching
+implications (see Section \ref{sec:potentialuses}). One of which is
+increased efficiency of device utilization. By allowing devices to
+be exported from machines where they are not needed and imported on
+machines where they are, we can insure that devices are efficiently
+utilized without having to worry about the underlying physical locations
+of the devices.
+
+One of the foremost tenants of the Unix philosophy is the ``Everything
+is a file'' concept. The NCD system extends this concept to
+``Everything is a networked file''. This allows us to create ``Device
+Servers'' as easily as we currently create file servers. The NCD
+system allows us to network any device via the general and
+well-understood file interface instead of relying on devices specific
+networking implementations.
 
 \subsection{Challenges}
 \label{sec:challenges}
 
+
 \section{Future Work}
 \label{sec:futurework}
+
+
+\section{Potential Uses}
+\label{sec:potentialuses}
+
+\subsection{Networked KVM System}
+\label{sec:networkedkvm}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\textwidth]{kvm-g.png}
+  \caption{A networked KVM system built using NCD.}
+  \label{fig:kvm}
+\end{figure}
+
+\subsection{Distributed RNG System}
+\label{sec:distributedrng}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\textwidth]{rng-g.png}
+  \caption{A distributed Random Number Generator system built using NCD.}
+  \label{fig:rng}
+\end{figure}
 
 \section{Conclusion}
 \label{sec:conclusion}
