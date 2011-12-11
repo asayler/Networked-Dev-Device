@@ -419,9 +419,56 @@ networking implementations.
 \subsection{Challenges}
 \label{sec:challenges}
 
+While Network Charter Devices provide a number of advantages, we have
+also stumbled upon a number of challenges when it comes to properly
+building and utilizing an NCD system. In particular, the NCD system:
+
+\begin{packed_item}
+\item Does not work well when Character Device file is not the exclusive
+  device interface
+\item Requires exported devices to be ``de-integrated'' from host system
+\item Requires QOS guarantees and high quality network connection
+\end{packed_item}
+
+The original intention of the Unix and Linux \texttt{dev} file
+system and the corresponding Charter Device file interface was to
+provide the sole interface to device drivers. Today, while Character
+Device file interfaces are still is use, they are no longer the sole
+devise driver interface. Auxiliary systems like procfs
+\cite{interfaces}, sysfs \cite{sysfs-mochel}, and netlink sockets
+\cite{netlink-ayuso} provide supplementary and/or replacement interfaces
+for the tradition Character Device file interface. Furthermore, some
+dives interact directly with in-kernel subsystems (HID subsystem,
+etc). Since our system
+focuses on arbitrating the Charter Device file interface over the
+network, use of these additional or alternate interfaces make devices
+incompatible with the NCD system. This incompatibility can be mitigated
+by extending the NCD system to include these alternate interfaces, but
+breakdown of the original Unix ideal of having a dingle device driver
+interface makes building system like NCD much more difficult and less
+generalized.
+
+Most modern Operating Systems, including Linux, assume that any device
+physically connected to the system is available for the system to
+use. As mentioned previously, Network Character Devices break down this
+assumption. This one of the challenges involved in implementing an NCD
+system is to remove the OS's assumption that any connected devices in
+available for local use. Modern-day plug-and-play auto-configuration
+system make this task even more difficult, and the means for breaking
+down the availability assumption tends to be unique to a given
+OS. Effectively removing this assumption is one of the larger,
+still-open, NCD challenges.
+
+Finally, since the NCD system makes a networked device appear as
+though it is connect locally, the NCD system does not gracefully
+handle situations that would never occur locally like network faults
+and errors. Thus, the NCD system performs best when running on a
+network with QOS guarantees and the necessary throughput to support all
+NCD traffic.
 
 \section{Future Work}
 \label{sec:futurework}
+
 
 
 \section{Potential Uses}
