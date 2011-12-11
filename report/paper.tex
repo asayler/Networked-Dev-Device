@@ -265,6 +265,18 @@ the future for enhanced functionality.
 
 \subsubsection{ncadmin}
 
+\lstinputlisting[
+  caption={The potential management interface for the NCD system.},
+  label=lst:ncadmin
+]{ncadmin.txt}
+
+As NCD grows, it will be important for the client to be able to handle
+dynamically added and removed devices. Listing \ref{lst:ncadmin}
+provides an idea of what an interface would look like to provide such
+functionality. This would give NCD the ability to create its character
+devices anywhere under \texttt{/dev}; they could be placed in a similar
+location to the corresponding device on the server.
+
 % Andy Sections
 
 \section{Results and Evaluation}
