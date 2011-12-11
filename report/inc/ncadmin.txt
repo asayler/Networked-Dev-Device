@@ -1,0 +1,12 @@
+usage: ncadmin command [args]
+
+  The following commands are supported:
+
+    add server port [name]
+      server - an ip address
+      port   - a port
+      name   - optional name relative to /dev. if no name is
+               specified /dev/netchar/import# will be used
+
+    rm name
+      name   - the device relative to /dev to remove

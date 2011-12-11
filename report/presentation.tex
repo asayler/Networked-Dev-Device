@@ -32,7 +32,6 @@
   captionpos=b,
   breaklines=true,
   breakatwhitespace=false,
-  title=\lstname,
   frame=single,
   frameround=tttt
 }
@@ -239,75 +238,23 @@
 
 \subsection{Protocol}
 
-\begin{frame}[fragile]{Protocol}
+\begin{frame}{Protocol}
   \begin{columns}
     \begin{column}{0.5\textwidth}
-      \begin{lstlisting}[gobble=8]
-        enum FOPS {
-          FOP_OPEN, FOP_RELEASE,
-          FOP_READ, FOP_WRITE,
-          _FOP_ERROR
-        };
-
-        struct fop_request {
-
-          enum FOPS call;
-
-          union {
-            struct {
-              int     flags;
-              mode_t  mode;
-            };
-
-            size_t  count;
-          };
-        };
-      \end{lstlisting}
+      \lstinputlisting[lastline=19]{protocol.c}
     \end{column}
     \begin{column}{0.5\textwidth}
-      \begin{lstlisting}[gobble=8]
-        struct fop_reply {
-
-          enum FOPS call;
-
-          union {
-            int      open;
-            int      close;
-            ssize_t  read;
-            ssize_t  write;
-          };
-        };
-      \end{lstlisting}
+      \lstinputlisting[firstline=21]{protocol.c}
     \end{column}
   \end{columns}
 \end{frame}
 
 \subsection{Client}
 
-\begin{frame}[fragile]{Hello, World!}
+\begin{frame}{Hello, World!}
   \begin{columns}
     \begin{column}{0.6\textwidth}
-      \begin{lstlisting}[gobble=8]
-        #include <linux/kernel.h>
-        #include <linux/module.h>
-
-        static int __init nc_init(void)
-        {
-          /* do stuff */
-          return 0;
-        }
-
-        static int __exit nc_exit(void)
-        {
-          /* undo stuff */
-        }
-
-        MODULE_LICENSE("GPL");
-
-        module_init(nc_init);
-        module_exit(nc_exit);
-
-      \end{lstlisting}
+      \lstinputlisting[]{kmod-hello.c}
     \end{column}
     \begin{column}{0.4\textwidth}
       \begin{itemize}
@@ -318,18 +265,8 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}[fragile]{Character Device Driver}
-  \begin{lstlisting}[gobble=4]
-    #include <linux/cdev.h>
-    #include <linux/device.h>
-    #include <linux/fs.h>
-
-    static dev_t          nc_dev_t;
-    static struct class*  nc_class;
-    static struct cdev*   nc_cdev;
-    static struct device* nc_device;
-
-  \end{lstlisting}
+\begin{frame}{Character Device Driver}
+  \lstinputlisting[]{cdev-driver.c}
 
   \begin{itemize}
     \item<1-> \texttt{dev\_t}: major/minor number
@@ -340,20 +277,8 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Filesystem Handler}
-  \begin{lstlisting}[gobble=4]
-    #include <linux/fs.h>
-
-    static int netchar_open(struct inode* inp, struct file* fp);
-    static ssize_t netchar_read(struct file* fp, char* buffer,
-                                size_t length, loff_t* offset);
-
-    static struct file_operations nc_fops = {
-      /* ... */
-      .open  = nc_open,
-      .read  = nc_read,
-    }
-  \end{lstlisting}
+\begin{frame}{Filesystem Handler}
+  \lstinputlisting[]{fop-driver.c}
 
   \begin{itemize}
     \item<1-> required when registering character device
@@ -375,61 +300,28 @@
 
 \subsection{Server}
 
-\begin{frame}[fragile]{Server (\texttt{read()})}
-  \begin{lstlisting}[gobble=4]
-    struct fop_request req;
-    struct fop_reply   rep;
-    while (1) {
-      err = read(sd, &req, sizeof(req));
-      switch(req.call) {
-      case FOP_READ:
-        payload = realloc(payload, req.count);
-        rep.read = read(fd, payload, req.count);
-        if (rep.read < 0)
-          rep.read = -errno;
-        break;
-      }
-      err = write(sd, &rep, sizeof(rep));
-      if (rep.call == FOP_READ && rep.read > 0)
-        err = write(sd, payload, rep.read)
-    }
-  \end{lstlisting}
+\begin{frame}{Server (\texttt{read()})}
+  \lstinputlisting[]{server.c}
 \end{frame}
 
 \subsection{Misc}
 
-\begin{frame}[t,fragile]{\texttt{udev}}
-  \begin{lstlisting}[gobble=4,title=no way to set permissions within kernel,language=]
-    ACTION=="add", SUBSYSTEM=="netchar", MODE="0666"
-  \end{lstlisting}
-  \begin{lstlisting}[gobble=4,title=cannot retroactively apply input attributes,language=]
-    $ udevadm info -qall -n /dev/input/event8
-    P: /devices/virtual/input/input8/event8
-    N: input/event8
-    E: DEVNAME=/dev/input/event8
-    E: DEVPATH=/devices/virtual/input/input8/event8
-    E: ID_INPUT=1
-    E: ID_INPUT_KEY=1
-    E: SUBSYSTEM=input
-  \end{lstlisting}
+\begin{frame}[t]{\texttt{udev}}
+  \lstinputlisting[
+    lastline=1,
+    language={},
+    title=no way to set permissions within kernel,
+  ]{udev.txt}
+  \lstinputlisting[
+    firstline=2,
+    language={},
+    title=cannot retroactively apply input attributes
+  ]{udev.txt}
 %$
 \end{frame}
 
-\begin{frame}[fragile]{\texttt{ncadmin}}
-  \begin{lstlisting}[gobble=4,language=]
-    usage: ncadmin command [args]
-
-      The following commands are supported:
-
-      add server port [name]
-        server - an ip address
-        port   - a port
-        name   - optional name relative to /dev. if no name is
-                 specified /dev/netchar/import# will be used
-
-      rm name
-        name   - the device relative to /dev to remove
-  \end{lstlisting}
+\begin{frame}{\texttt{ncadmin}}
+  \lstinputlisting[]{ncadmin.txt}
   \begin{itemize}
     \item<2-> does nothing!
     \item<3-> could use discovery service
