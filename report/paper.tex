@@ -344,7 +344,8 @@ implementing such a system into an existing OS like Linux entails.
 \end{figure}
 
 As of this writing, we have completed a partial implementation of
-the Network Character Devices system. Current functionality includes:
+the Network Character Devices system (Figure
+\ref{fig:system-working}). Current functionality includes:
 
 \begin{packed_item}
 \item Support for exporting a single character device from the server
@@ -469,7 +470,67 @@ NCD traffic.
 \section{Future Work}
 \label{sec:futurework}
 
+As Figure \ref{fig:system-working} shows, there are still several
+portions of the NCD system that need implemented before the system is
+ready for production-level use. In particular, the top priorities
+currently are:
 
+\begin{packed_item}
+\item Add multi-device, multi-server support
+\item Add kernel sub-system handler layer (HID, etc)
+\item Add device protection and removal capabilities to server system
+\item Add advertisement protocol
+\item Separate networking and memory-intensive code from client kernel module
+\end{packed_item}
+
+The current NCD system only support a single device per server and per
+client. To be truly useful and to enable the construction of the
+kinds of system we envision NCD being used for (Section
+\ref{potentialuses}), we must at least
+expand the client-side
+system to support importing an arbitrary number of devices from one
+or more servers. Ideally, servers should also be capable of serving
+multiple devices, but this is of less importance than multi-device
+client handling.
+
+As we mentioned in Section \ref{sec:challenges}, some modern device
+drivers bypass the traditional Character Device file interface. Thus, we
+must expand the NCD system to accommodate the additional interfaces and
+subsystems that are commonly in use. This includes special import
+handling for in-kernel subsystems like the X Server and HID
+subsystems, as well as generalized support for sysfs and procfs import
+and export.
+
+We also plan to add a means for device protection and exclusion to
+the NCD system. This will include both the need to remove exported
+devices from use by local server-side operating systems as well as controlling
+the number of clients that can connect to a single exported
+device. Controlling the latter point will require a per-device
+definition, probably provided as part of the export configuration, of
+how many clients may simultaneously utilize each device. Some devices will
+require exclusive access while other may be capable of handling read
+and/or write request from multiple clients simultaneously. 
+
+Since large scale NCD deployments may include thousands of exported
+devices, the NCD system requires the addition of an advertisement and
+discovery protocol so that client may ascertain what resources are
+currently available for import. Such a system will need to provide
+information about what devices are available, as well as metadata
+describing the basic characteristics of a given device.
+
+Finally, the current client-side NCD implementation performs both direct
+network access and memory-intensive processing directly in the kernel
+code. For security reasons, it is desirable to separate the direct
+network communication from the kernel code to user-space code where
+the repercussions of a security breach as less extreme.
+For performance reasons, it is desirable to move memory
+intensive operations from the kernel code (where they are limited to
+the available kernel memory space) to user-space code where the memory
+availability is far greater and the use restrictions more relaxed. To
+solve these issues, we
+foresee building a client-daemon that will handle the bulk to the
+client-side operations and that will, in turn, communicate directly with
+a more minimal client kernel module only when necessary. 
 
 \section{Potential Uses}
 \label{sec:potentialuses}
