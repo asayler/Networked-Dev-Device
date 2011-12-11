@@ -29,6 +29,8 @@
   captionpos=b,
   breaklines=true,
   breakatwhitespace=false,
+  frame=none,
+  frameround=tttt,
   float
 }
 
@@ -49,8 +51,10 @@
 \begin{document}
 
 \title{Networked Character Devices}
-\author{Monaco, Matthew \and Sayler, Andrew \and Spear, Landon
-  \\ \and University of Colorado}
+\author{Monaco, Matthew \and Sayler, Andrew \and Spear, Landon \\
+  \and University of Colorado \\
+  \texttt{first.last@colorado.edu}
+}
 \date{\today}
 
 \maketitle
@@ -59,9 +63,15 @@
 While there are various projects which provide a network abstraction layer for
 specific high-level subsystems in the Linux kernel, there aren't any low-level
 general purpose solutions. Network character devices (NCD) is a system for
-exporting character device drivers of a fast, local network. However NCD works
-to some extent with regular files, block devices, sockets, and pipes; it is also
-suitably responsive over Internet connections for many applications.
+exporting character device interfaces over a network. This capability
+divorces the traditional requirement that a device can only be used by
+the host to which it is physically connected in favor of a model that
+allows a device to be connected to one host but used by another.
+In addition to networking the character device interface for which it
+is optimized, NCD also works with regular files, block devices,
+sockets, and pipes. We demonstrate how our NCD system works, as well
+as a few examples of the unique systems that can be built atop the NCD
+interface.
 \end{abstract}
 
 % Landon Sections
