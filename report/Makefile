@@ -7,12 +7,12 @@ PAPER_INCLUDES        = arch-03.svg proto.svg system-full.svg system-working.svg
 
 INCLUDE_DIR = inc
 
-BIBTEX    ?= bibtex -terse
-LATEX     ?= pdflatex -file-line-error
-LATEXFIRST  ?= -interaction=batchmode
-LATEXLAST  ?=  -halt-on-error
-INKSCAPE  ?= inkscape
-CONVERT   ?= convert
+BIBTEX     ?= bibtex -terse
+LATEX      ?= pdflatex -file-line-error
+LATEXFIRST ?= -interaction=batchmode
+LATEXLAST  ?= -halt-on-error
+INKSCAPE   ?= inkscape
+CONVERT    ?= convert
 
 export TEXINPUTS := .:./$(INCLUDE_DIR)/:$(TEXINPUTS)
 
@@ -45,24 +45,24 @@ paper.pdf: paper.aux paper.bbl
 	$(LATEX) $(LATEXLAST) paper.tex
 
 paper.bbl: paper.aux refs.bib
-	$(BIBTEX) -terse paper.aux
+	$(BIBTEX) paper.aux
 
 paper.aux: paper.tex $(PAPER_INCLUDES)
-	$(LATEX)  $(LATEXFIRST) paper.tex
+	$(LATEX) $(LATEXFIRST) paper.tex
 
 .PHONY: presentation
 
 presentation: presentation.pdf clean
 
 presentation.pdf: presentation.aux presentation.bbl
-	$(LATEX)  $(LATEXFIRST) presentation.tex
+	$(LATEX) $(LATEXFIRST) presentation.tex
 	$(LATEX) $(LATEXLAST) presentation.tex
 
 presentation.bbl: presentation.aux refs.bib
 	$(BIBTEX) presentation.aux
 
 presentation.aux: presentation.tex $(PRESENTATION_INCLUDES)
-	$(LATEX)  $(LATEXFIRST) presentation.tex
+	$(LATEX) $(LATEXFIRST) presentation.tex
 
 # figures
 
@@ -72,4 +72,3 @@ presentation.aux: presentation.tex $(PRESENTATION_INCLUDES)
 %-g.png: %.png
 	[ -f $< ] && prereq=$< || prereq=$(INCLUDE_DIR)/$<; \
 	$(CONVERT) -colorspace gray $$prereq $(INCLUDE_DIR)/$@
-
