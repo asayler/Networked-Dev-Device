@@ -43,6 +43,7 @@ paper: paper.pdf clean
 paper.pdf: paper.aux paper.bbl
 	$(LATEX) $(LATEXFIRST) paper.tex
 	$(LATEX) $(LATEXLAST) paper.tex
+	@touch $^ $@
 
 paper.bbl: paper.aux refs.bib
 	$(BIBTEX) paper.aux
@@ -57,6 +58,7 @@ presentation: presentation.pdf clean
 presentation.pdf: presentation.aux presentation.bbl
 	$(LATEX) $(LATEXFIRST) presentation.tex
 	$(LATEX) $(LATEXLAST) presentation.tex
+	@touch $^ $@
 
 presentation.bbl: presentation.aux refs.bib
 	$(BIBTEX) presentation.aux
