@@ -70,6 +70,6 @@ presentation.aux: presentation.tex $(PRESENTATION_INCLUDES)
 	$(INKSCAPE) -e $(INCLUDE_DIR)/$@ $<
 
 %-g.png: %.png
-	[[ -f $< ]] && prereq=$< || prereq=$(INCLUDE_DIR)/$<; \
+	[ -f $< ] && prereq=$< || prereq=$(INCLUDE_DIR)/$<; \
 	$(CONVERT) -colorspace gray $$prereq $(INCLUDE_DIR)/$@
 
