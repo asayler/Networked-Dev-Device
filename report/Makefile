@@ -9,6 +9,8 @@ INCLUDE_DIR = inc
 
 BIBTEX    ?= bibtex -terse
 LATEX     ?= pdflatex -file-line-error
+LATEXFIRST  ?= -interaction=batchmode
+LATEXLAST  ?=  -halt-on-error
 INKSCAPE  ?= inkscape
 CONVERT   ?= convert
 
@@ -39,28 +41,28 @@ allclean: clean
 paper: paper.pdf clean
 
 paper.pdf: paper.aux paper.bbl
-	$(LATEX) paper.tex
-	$(LATEX) paper.tex
+	$(LATEX) $(LATEXFIRST) paper.tex
+	$(LATEX) $(LATEXLAST) paper.tex
 
 paper.bbl: paper.aux refs.bib
 	$(BIBTEX) -terse paper.aux
 
 paper.aux: paper.tex $(PAPER_INCLUDES)
-	$(LATEX) paper.tex
+	$(LATEX)  $(LATEXFIRST) paper.tex
 
 .PHONY: presentation
 
 presentation: presentation.pdf clean
 
 presentation.pdf: presentation.aux presentation.bbl
-	$(LATEX) presentation.tex
-	$(LATEX) presentation.tex
+	$(LATEX)  $(LATEXFIRST) presentation.tex
+	$(LATEX) $(LATEXLAST) presentation.tex
 
 presentation.bbl: presentation.aux refs.bib
 	$(BIBTEX) presentation.aux
 
 presentation.aux: presentation.tex $(PRESENTATION_INCLUDES)
-	$(LATEX) presentation.tex
+	$(LATEX)  $(LATEXFIRST) presentation.tex
 
 # figures
 
