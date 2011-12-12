@@ -45,6 +45,21 @@
   \setlength{\itemsep}{1pt}
   \setlength{\parskip}{0pt}
   \setlength{\parsep}{0pt}
+\label{sec:introduction}
+
+We did some stuff, we used some references \cite{ldd3}.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\textwidth]{system-full-g.png}
+  \caption{The NCD system. See Figure \ref{fig:system-working}
+    for currently implemented system state.}
+  \label{fig:system-full}
+\end{figure}
+
+\section{Related Work}
+\label{sec:relatedwork}
+
 }{\end{itemize}}
 
 \begin{document}
@@ -78,7 +93,39 @@ interface.
 \section{Introduction}
 \label{sec:introduction}
 
-We did some stuff, we used some references \cite{ldd3}.
+We have designed and implemented Network Character Devices (NCD) to
+enable a new approach to using and sharing devices. Today, networking 
+technology is becoming faster and more reliable at incedible rates. 
+More functionality that has been traditionally thought to only be 
+feasabily locally accessable can now be pushed to remote
+machines. Using client-server operation, our project aims to allow 
+a character device (or devices) present on a server to be exported to
+a client over a network connection. While character devices come in 
+many forms, from Webcams, mice and monitors to USB flash drives and 
+external hard drives, NCD works below where these devices are 
+interpreted and exports their device file over IP. While designed for
+character devices, this generality will actually allow us to export 
+any file, which in a *nix system means almost anything on the
+system. Being able to dynamically export devices over network
+connections suggests a new cloud-like paradigm of device usage where 
+locality is required only for reduced latency, which may not be a
+concern for certain devices. 
+
+When a device is being exported by NCD we would like it to give the
+appearence of having essentially ``moved'' the device to the client 
+by forbidding user level accesses on the server. This is not part 
+of our current iteration of NCD, but it will be included as higher
+level functionality is implemented. Aquiring a remote device will be
+done through an advertisment protocol that exists in user space so
+that details may be supplied about the server and how the connection
+should be made (e.g. UDP vs TCP).  After this NCD's functionality on
+the client exists in kernel space so as to maintain transparency to
+user level operations. Once imported, a device should be accessed just
+like a normal local device.  This is acheived by the NCD kernel module
+intercepting accesses and sending them out over the network to the
+server. On the server, a userspace daemon accesses the physical
+device to emulate the client's activity. The overall structure of the
+NCD system is present in figure 1.
 
 \begin{figure}[h]
   \centering
@@ -88,10 +135,52 @@ We did some stuff, we used some references \cite{ldd3}.
   \label{fig:system-full}
 \end{figure}
 
+Currently we have achieved a successful implementation of the low
+level functionality for NCD. The client uses a kernel module written
+for linux 2.6.x+ while the server uses a userspace daemon. NCD is
+still rough and in need of further development, as it tends to be
+crash prone if not treated with care. The groundwork has been laid for
+exporting any device, however many device subsystems access their
+devices by avoiding the character device interface and these must be
+dealt with on an individual basis. Overall, the path for future work
+is very clear.
+
+
+
 \section{Related Work}
 \label{sec:relatedwork}
 
-We are unique.
+There are many other projects in existence that implement similar
+network sharing in one form or another that provided inspiration for
+NCD.
+
+NFS was the first implementation of truely general information sharing
+over remote network connections.  However, NFS uses a specific file
+system and cannot interface directly with devices.\cite{nfs-source}
+
+NBD (Network Block Device) was included into the linux kernel starting
+with version 2.1.101. It enables users to export block devices over the
+network, allowing use of any filesystem. However, NBD provides no
+exclusive access guarantees and users must acertain on their own
+whether the remote drive is being used.\cite{nbd-source}
+
+CUSE (Character Device in User Space) is an extension of FUSE that
+allows bringing a characer device into a FUSE filesystem.  This allows
+users to access the device directly and potentially export it using
+user-level networking.\cite{cuse-article}
+
+USB/IP is a project to share USB devices over IP. This project is
+very similar to NCD (as USB devices are character devices) but is
+tailored specifinterceptingically to allow sharing USB devices over a
+network connection by intercepting USB specific data and encapsulating
+it in IP.\cite{usbip-source}
+
+Plan 9 is a distributed operating system developed as a successor to
+Unix by Bell Labs.  It implicitly allows sharing devices over a
+network via file interfaces. However, plan 9 does not currenty see
+wide deployment.\cite{plan9-pike}
+
+
 
 % Matt Sections
 
@@ -643,3 +732,4 @@ device-dependent systems.
 \end{document}
 
 % vim: set ts=2 sts=2 sw=2 et spell tw=72 : %
+intercepting
