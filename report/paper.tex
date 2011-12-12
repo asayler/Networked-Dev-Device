@@ -80,13 +80,13 @@ interface.
 
 We have designed and implemented Network Character Devices (NCD) to
 enable a new approach to using and sharing devices. Today, networking 
-technology is becoming faster and more reliable at incedible rates. 
+technology is becoming faster and more reliable at incredible rates. 
 More functionality that has been traditionally thought to only be 
-feasabily locally accessable can now be pushed to remote
+feasibly locally accessible can now be pushed to remote
 machines. Using client-server operation, our project aims to allow 
 a character device (or devices) present on a server to be exported to
 a client over a network connection. While character devices come in 
-many forms, from Webcams, mice and monitors to USB flash drives and 
+many forms, from Web cams, mice and monitors to USB flash drives and 
 external hard drives, NCD works below where these devices are 
 interpreted and exports their device file over IP. While designed for
 character devices, this generality will actually allow us to export 
@@ -97,16 +97,16 @@ locality is required only for reduced latency, which may not be a
 concern for certain devices. 
 
 When a device is being exported by NCD we would like it to give the
-appearence of having essentially ``moved'' the device to the client 
+appearance of having essentially ``moved'' the device to the client 
 by forbidding user level accesses on the server. This is not part 
 of our current iteration of NCD, but it will be included as higher
-level functionality is implemented. Aquiring a remote device will be
-done through an advertisment protocol that exists in user space so
+level functionality is implemented. Acquiring a remote device will be
+done through an advertisement protocol that exists in user space so
 that details may be supplied about the server and how the connection
 should be made (e.g. UDP vs TCP).  After this NCD's functionality on
 the client exists in kernel space so as to maintain transparency to
 user level operations. Once imported, a device should be accessed just
-like a normal local device.  This is acheived by the NCD kernel module
+like a normal local device.  This is achieved by the NCD kernel module
 intercepting accesses and sending them out over the network to the
 server. On the server, a userspace daemon accesses the physical
 device to emulate the client's activity. The overall structure of the
@@ -660,7 +660,7 @@ limited on any single system to the locally available
 entropy. This can severely hinder the
 performance of systems that require random numbers\footnote{Linux also
 provides the \texttt{/dev/urandom} RNG which is a pseudorandom number
-generator seeded off teh true
+generator seeded off the true
 \texttt{/dev/random}. \texttt{/dev/urandom} trades ``randomness'' in
 favor of speed. It is thus handy when one just needs to quickly
 generate pseudorandom numbers, but is not appropriate for cryptography or
