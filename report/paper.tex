@@ -11,7 +11,7 @@
 \usepackage{graphicx}
 \usepackage{url}
 \usepackage{listings}
-\usepackage[bookmarks,hidelinks]{hyperref}
+\usepackage{hyperref}
 
 \bibliographystyle{plain}
 
@@ -32,6 +32,14 @@
   breakatwhitespace=false,
   frame=none,
   frameround=tttt
+}
+
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
 }
 
 \newenvironment{packed_enum}{
@@ -82,33 +90,32 @@ interface.
 We have designed and implemented Network Character Devices (NCD) to
 enable a new approach to using and sharing devices. Today, networking 
 technology is becoming faster and more reliable at incredible rates. 
-More functionality that has been traditionally thought to only be 
-feasibly locally accessible can now be pushed to remote
-machines. Using client-server operation, our project aims to allow 
-a character device (or devices) present on a server to be exported to
-a client over a network connection. While character devices come in 
-many forms, from Web cams, mice and monitors to USB flash drives and 
-external hard drives, NCD works below where these devices are 
-interpreted and exports their device file over IP. While designed for
-character devices, this generality will actually allow us to export 
-any file, which in a *nix system means almost anything on the
-system. Being able to dynamically export devices over network
+Functionality that has been traditionally believed to only be 
+feasible at the local level can now be pushed to remote
+machines. Our project aims to allow 
+a character device present on a server to be exported to
+a client over a network connection. Many systems use character device
+interfaces, from Web cams, mice and monitors to USB flash drives and 
+external hard drives. NCD works by abstracting the character device interface 
+over IP. In Unix-like operating system, the character device interface
+is a file interface. While designed and optimized for
+character devices, this generality actually allows the NCD system to export 
+any file. Being able to dynamically export devices over network
 connections suggests a new cloud-like paradigm of device usage where 
 locality is required only for reduced latency, which may not be a
 concern for certain devices. 
 
-When a device is being exported by NCD we would like it to give the
+When a device is exported via the NCD system we would like it to give the
 appearance of having essentially ``moved'' the device to the client 
-by forbidding user level accesses on the server. This is not part 
-of our current iteration of NCD, but it will be included as higher
-level functionality is implemented. Acquiring a remote device will be
+by forbidding user level accesses on the server.
+Acquiring a remote device will be
 done through an advertisement protocol that exists in user space so
 that details may be supplied about the server and how the connection
-should be made (e.g. UDP vs TCP).  After this NCD's functionality on
-the client exists in kernel space so as to maintain transparency to
+should be made (e.g. UDP vs TCP).  The client-side NCD's functionality
+exists in kernel space so as to maintain transparency to
 user level operations. Once imported, a device should be accessed just
 like a normal local device.  This is achieved by the NCD kernel module
-intercepting accesses and sending them out over the network to the
+intercepting i/o calls and sending them out over the network to the
 server. On the server, a userspace daemon accesses the physical
 device to emulate the client's activity. The overall structure of the
 NCD system is present in Figure \ref{fig:system-full}.
@@ -128,8 +135,8 @@ still rough and in need of further development, as it tends to be
 crash prone if not treated with care. The groundwork has been laid for
 exporting any device, however many device subsystems access their
 devices by avoiding the character device interface and these must be
-dealt with on an individual basis. Overall, the path for future work
-is very clear.
+dealt with on an individual basis. Section \ref{sec:futurework}
+details some of these challenges and our plans for their resolution.
 
 \section{Related Work}
 \label{sec:relatedwork}
@@ -138,31 +145,38 @@ There are many other projects in existence that implement similar
 network sharing in one form or another that provided inspiration for
 NCD.
 
-NFS was the first implementation of truly general information sharing
-over remote network connections.  However, NFS uses a specific file
-system and cannot interface directly with devices \cite{nfs-source}.
+NFS was the first implementation of generalized file sharing
+over remote network connections.  However, NFS only supports normal
+files and cannot interface directly with devices \cite{nfs-source}.
 
-NBD (Network Block Device) was included into the Linux kernel starting
+NBD (Network Block Device) was rolled into the Linux kernel starting
 with version 2.1.101. It enables users to export block devices over the
-network, allowing use of any filesystem. However, NBD provides no
+network, allowing low level access to disks and other block devices.
+However, NBD provides no
 exclusive access guarantees and users must ascertain on their own
-whether the remote drive is being used \cite{nbd-source}.
+whether the remote drive is being used. It also mandates buffered
+operation and is optimized for block, not character, device operation
+\cite{nbd-source}.
 
 CUSE (Character Device in User Space) is an extension of FUSE that
 allows bringing a character device into a FUSE filesystem.  This allows
 users to access the device directly and potentially export it using
-user-level networking \cite{cuse-article}.
+user-level networking \cite{cuse-article}. We considered using CUSE in
+our NCD implementation, but opted for a direct in-kernel implementation
+instead since it is more standard.
 
-USB/IP is a project to share USB devices over IP. This project is
+USB/IP is a project to share USB devices over IP networks. This project is
 very similar to NCD (as USB devices are character devices) but is
 tailored specifically to allow sharing USB devices over a
 network connection by intercepting USB specific data and encapsulating
-it in IP \cite{usbip-source}.
+it in IP \cite{usbip-source}. It does not support a more generalized
+notion of general character device networking.
 
 Plan 9 is a distributed operating system developed as a successor to
 Unix by Bell Labs.  It implicitly allows sharing devices over a
 network via file interfaces. However, Plan 9 does not currently see
-wide deployment \cite{plan9-pike}.
+wide deployment \cite{plan9-pike}. We hope to bring the NCD concept to
+the more widely deployed Linux environment.
 
 % Matt Sections
 
@@ -184,7 +198,7 @@ server never initiates any communication on its own.
 
 The client is currently implemented entirely within an out-of-tree kernel
 module. This is arguably not the most robust, nor secure, solution. See
-section \ref{sec:futurework} for details on splitting out some functionality
+Section \ref{sec:futurework} for details on splitting out some functionality
 into a user-space helper.
 
 Devices which have been imported on the client reside within the
@@ -199,7 +213,7 @@ the user or administrator may choose any mapping (s)he see fits.
 \subsection{Server}
 
 The server is a typical user-space daemon. It
-currently only services a single file. Whether or not the server should
+currently only serves a single file. Whether or not the server should
 handle multiple exports is still up for evaluation.
 
 The server listens on a port specified on the command line. There is no
@@ -226,14 +240,14 @@ extent.
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.5\textwidth]{proto-g.png}
-  \caption{NCD operates over a simple request reply protocol. Bulk data
+  \caption{NCD operates over a simple request-reply protocol. Bulk data
     immediately follows formal messages, as required.}
   \label{fig:protocol}
 \end{figure}
 
 The protocol is implemented as a simple request-reply system over
 \texttt{INET} sockets. All request types are encapsulated within a
-single request structure (see section \ref{sec:implementation}).
+single request structure (see Section \ref{sec:implementation}).
 Similarly, there is only a single reply structure to account for all
 reply types.
 
@@ -262,7 +276,7 @@ beneficial to implement the core protocol over TCP and bulk data over
 UDP (section \ref{sec:futurework}).
 
 Because there is only one type of packet for a request, and another for
-a reply, (listing \ref{lst:protocol}) there is a small amount of wasted
+a reply, (Listing \ref{lst:protocol}) there is a small amount of wasted
 space on some file operations. We have done our best to reduce this
 overhead as much as possible, making use of a cascade of nested unions
 and structs.
@@ -282,7 +296,7 @@ aren't any cases where these need to be passed over the network.
 
 The client resides entirely within a kernel module \footnote{The merits
 of including everything within a kernel module are discussed in section
-\ref{sec:currentstatus}.}. A typical userspace program can be sloppy
+\ref{sec:futurework}.}. A typical userspace program can be sloppy
 with cleanup because all memory is freed on termination. In contrast, a
 kernel module must be very careful because its lifetime is shorter than
 the kernel itself. Therefore it is very import to correctly handle
@@ -290,7 +304,7 @@ errors and cleanup all memory in the \texttt{module\_init} and
 \texttt{module\_exit} routines.
 
 Some of the basic features of the NCD kernel module are listed in
-listing \ref{lst:client}. NCD dynamically requests a major and
+Listing \ref{lst:client}. NCD dynamically requests a major and
 minor number from the running kernel \footnote{Statically assigned
 major/minor numbers are no longer required and are discouraged for new
 modules.}. These numbers are stored in a \texttt{struct dev\_t}. Once
@@ -331,7 +345,7 @@ The server will spend most of its time sitting on a blocked read of the
 socket file descriptor. Once the client sends a request, it will be
 available to the server in the appropriate structure.
 
-In the snippet given in listing \ref{lst:server}, a \texttt{read()} file
+In the snippet given in Listing \ref{lst:server}, a \texttt{read()} file
 operation is handled. A buffer must be allocated with a size
 indicated by the original request. Next, the server can perform the
 corresponding operation and send a reply message to the client. Finally,
@@ -359,7 +373,7 @@ new features.
 A lot of magic is performed on character devices in userspace by
 the Linux \texttt{udev} system.
 Currently we are using \texttt{udev} to manage the
-permissions of imported devices (listing \ref{lst:udevrule}).
+permissions of imported devices (Listing \ref{lst:udevrule}).
 
 \lstinputlisting[
   firstline=3,
@@ -369,7 +383,7 @@ permissions of imported devices (listing \ref{lst:udevrule}).
 ]{udev.txt}
 
 For more functionality, imported character devices must have certain
-attributes such as those for the keyboard in listing \ref{lst:udevattr}.
+attributes such as those for the keyboard in Listing \ref{lst:udevattr}.
 Unfortunately setting them retroactively does not convince all programs
 of a particular devices type. Therefore interfacing with specific kernel
 subsystems such as \texttt{input} and \texttt{usb} will be required in
@@ -428,7 +442,7 @@ the Network Character Devices system (Figure
 \end{packed_item}
 
 This set of core functionality provides a working proof-of-concept
-Network Character Devices system. This system fully supports the
+Network Character Device system. This system fully supports the
 export of a single character device from server to client over the
 network and demonstrates the basic use and utility of such a system.
 
@@ -524,7 +538,7 @@ Most modern Operating Systems, including Linux, assume that any device
 physically connected to the system is available for the system to
 use. As mentioned previously, Network Character Devices break down this
 assumption. Thus, one of the challenges involved in implementing an NCD
-system is to remove the OS's assumption that any connected devices in
+system is to remove the OS's assumption that any connected device is
 available for local use. Modern-day plug-and-play auto-configuration
 systems make this task even more difficult, and the means for breaking
 down the availability assumption tend to be unique to a given
@@ -550,11 +564,11 @@ currently are:
 \item Add multi-device, multi-server support
 \item Add kernel sub-system handler layer (HID, etc)
 \item Add device protection and removal capabilities to server system
-\item Add advertisement protocol
+\item Add advertisement protocol and unreliable data protocol option
 \item Separate networking and memory-intensive code from client kernel module
 \end{packed_item}
 
-The current NCD system only support a single device per server and per
+The current NCD system only supports a single device per server and per
 client. To be truly useful and to enable the construction of the
 kinds of system we envision NCD being used for (Section
 \ref{sec:potentialuses}), we must at least
@@ -582,6 +596,13 @@ how many clients may simultaneously utilize each device. Some devices will
 require exclusive access while other may be capable of handling read
 and/or write request from multiple clients simultaneously. 
 
+Currently, all NCD traffic is sent via TCP. While control messages
+should always use TCP to insure system state and stability, there are
+device types who generate data more appropriate for UDP operation (web
+cams, etc). In the future, we hope to allow the user to specify
+whether the data traffic for a given device will be delivered via TCP
+or whether it can be delivered using UDP.
+
 Since large scale NCD deployments may include thousands of exported
 devices, the NCD system requires the addition of an advertisement and
 discovery protocol so that client may ascertain what resources are
@@ -591,7 +612,9 @@ describing the basic characteristics of a given device.
 
 Finally, the current client-side NCD implementation performs both direct
 network access and memory-intensive processing directly in the kernel
-code. For security reasons, it is desirable to separate the direct
+code. This approach was taken in our initial implementation to control
+complexity.
+For security reasons, it is desirable to move the direct
 network communication from the kernel code to user-space code where
 the repercussions of a security breach as less extreme.
 For performance reasons, it is desirable to move memory
@@ -617,7 +640,7 @@ NCD system.
 
 KVM (Keyboard-Video-Mouse) systems are commonly used in data centers
 and other areas where a user wishes to use a single keyboard, video,
-and mouse, to control multiple machines. KVM systems range from simple KVM
+and mouse to control multiple machines. KVM systems range from simple KVM
 switches that allow the user to select which local machine is
 physically connected to his or her i/o devices to
 networked KVM systems that allow the user to use a
@@ -650,13 +673,13 @@ rather trivial matter.
 \subsection{Distributed RNG System}
 \label{sec:distributedrng}
 
-Another example of the novel systems that can be built use Network
+Another example of the novel systems that can be built using Network
 Charter Devices is a distributed random number generator. Linux has a
 fairly robust random number generator built into it and accessible as
 a Character Device at \texttt{/dev/random}. This RNG relies on the
 local entropy pool (generally filled by human interaction, interrupt
 timings, and other high entropy events) to generate random
-numbers. This, the speed at which random numbers can be generated is
+numbers. Thus, the speed at which random numbers can be generated is
 limited on any single system to the locally available
 entropy. This can severely hinder the
 performance of systems that require random numbers\footnote{Linux also
@@ -683,7 +706,7 @@ Figure \ref{fig:rng} shows how such a system might work. In this
 distributed RNG system, multiple hosts act as NCD servers by exporting
 their local \texttt{/dev/random} character devices. These devices are
 all imported by a single client running some from on RNG aggregator
-that combines the relatively slow output form the local RNGs into a
+that combines the relatively slow output from the local RNGs into a
 single high speed RNG output. We can effectively pool the entropy
 available on numerous hosts to drive a single high performance RNG
 system.
@@ -697,7 +720,7 @@ implementation of such a system relatively straight forward.
 Network Character Devices provide an extension of the standard device
 driver file interface across the network. They allow for device
 capabilities to be exported from where they are not needed and imported
-where they are. By separating device usage from the device physical
+where they are. By separating device usage from the device's physical
 location and host, the NCD system provides a generalized, transparent,
 means for abstracting device functionality across a network.
 
